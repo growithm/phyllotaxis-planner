@@ -11,7 +11,7 @@
  - Gitコミットとプッシュ（feat: initial project setup）
  - _要件: 設計書のドキュメント戦略に基づく_
 
-- [ ] 0.2 開発環境とワークフロー文書の作成
+- [x] 0.2 開発環境とワークフロー文書の作成
  - 開発環境セットアップガイド（docs/guides/development.md）の作成
  - コーディング規約とベストプラクティス文書の作成
  - コントリビューションガイド（docs/guides/contributing.md）の作成
