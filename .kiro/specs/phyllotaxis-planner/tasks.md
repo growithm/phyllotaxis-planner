@@ -33,6 +33,7 @@
  - システム概要図（docs/architecture/system-overview.md）
  - コンポーネント関係図（docs/architecture/component-diagram.md）
  - データフロー図（docs/architecture/data-flow.md）
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: add architecture design documents）
  - _要件: 設計書のアーキテクチャ設計に基づく_
@@ -41,6 +42,7 @@
  - ECS基本概念とパターン説明（docs/architecture/ecs-design.md）
  - エンティティ・コンポーネント・システムの関係図
  - ECS実装ガイドラインとベストプラクティス
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: add ECS architecture design）
  - _要件: 設計書のECS設計に基づく_
@@ -49,6 +51,7 @@
  - イベントバス設計とイベントフロー（docs/architecture/event-driven-design.md）
  - イベント定義とライフサイクル
  - システム間通信パターンの説明
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: add event-driven architecture design）
  - _要件: 設計書のイベント駆動アーキテクチャに基づく_
@@ -57,6 +60,7 @@
  - コンポーネントAPI仕様書（docs/api/components.md）
  - ECSシステムインターフェース仕様
  - イベント定義とフロー仕様
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: add API specifications and interfaces）
  - _要件: 設計書のコンポーネント設計に基づく_
@@ -249,6 +253,7 @@
  - Storybookの設定と基本構成
  - 各UIコンポーネントのストーリー作成
  - インタラクティブドキュメントの実装
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: setup Storybook and component stories）
  - _要件: 設計書のドキュメント戦略に基づく_
@@ -265,6 +270,7 @@
  - プロジェクト概要とデモGIFの作成
  - フィロタキシスの科学的背景説明
  - クイックスタートガイドの作成
+ - Obsidian最適化（YAML frontmatter、内部リンク、タグ、コールアウト）
  - 全体の整合性確認とコードレビュー
  - Gitコミットとプッシュ（docs: create comprehensive README）
  - _要件: 設計書のREADME戦略に基づく_
