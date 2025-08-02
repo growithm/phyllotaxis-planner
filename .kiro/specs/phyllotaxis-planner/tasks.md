@@ -2,7 +2,7 @@
 
 ## 0. 事前ドキュメント作成
 
-- [ ] 0.1 Git管理とプロジェクト基本設定
+- [x] 0.1 Git管理とプロジェクト基本設定
  - .gitignoreファイルの作成（Node.js、Next.js、IDE設定）
  - README.mdの基本構造作成
  - package.jsonとプロジェクト設定ファイルの作成
