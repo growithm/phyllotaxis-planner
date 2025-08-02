@@ -1,8 +1,20 @@
+---
+title: "ADR-0005: イベント駆動アーキテクチャ採用の決定"
+type: adr
+status: approved
+date: 2025-02-08
+decision-makers: [development-team]
+tags: [adr, event-driven, architecture, decoupling, react, hooks]
+related:
+  - "[[0004-ecs-architecture]]"
+  - "[[0001-use-nextjs-15]]"
+  - "[[design]]"
+---
+
 # ADR-0005: イベント駆動アーキテクチャ採用の決定
 
-## ステータス
-
-承認済み
+> [!info] ステータス
+> 承認済み
 
 ## コンテキスト
 
@@ -300,7 +312,12 @@ class BatchedEventBus extends EventBusImpl {
 
 ## 関連文書
 
-- [Event-Driven Architecture](https://en.wikipedia.org/wiki/Event-driven_architecture)
-- [Observer Pattern](https://refactoring.guru/design-patterns/observer)
-- [設計書: イベント駆動アーキテクチャ設計](../design.md#イベント駆動アーキテクチャ設計)
-- [React Custom Hooks](https://reactjs.org/docs/hooks-custom.html)
+> [!note] 外部リンク
+> - [Event-Driven Architecture](https://en.wikipedia.org/wiki/Event-driven_architecture)
+> - [Observer Pattern](https://refactoring.guru/design-patterns/observer)
+> - [React Custom Hooks](https://reactjs.org/docs/hooks-custom.html)
+
+> [!info] 内部文書
+> - [[design#イベント駆動アーキテクチャ設計|設計書: イベント駆動アーキテクチャ設計]]
+> - [[0004-ecs-architecture|ADR-0004: ECSアーキテクチャ]]
+> - [[0001-use-nextjs-15|ADR-0001: Next.js 15採用]]

@@ -1,8 +1,20 @@
+---
+title: "ADR-0002: SVG over Canvasの採用"
+type: adr
+status: approved
+date: 2025-02-08
+decision-makers: [development-team]
+tags: [adr, svg, canvas, rendering, accessibility, performance]
+related:
+  - "[[0001-use-nextjs-15]]"
+  - "[[0003-phyllotaxis-algorithm]]"
+  - "[[design]]"
+---
+
 # ADR-0002: SVG over Canvasの採用
 
-## ステータス
-
-承認済み
+> [!info] ステータス
+> 承認済み
 
 ## コンテキスト
 
@@ -119,7 +131,12 @@ const IdeaNode = React.memo(({ idea, isAnimating }: IdeaNodeProps) => {
 
 ## 関連文書
 
-- [SVG 仕様書](https://www.w3.org/TR/SVG2/)
-- [React と SVG の統合](https://reactjs.org/docs/dom-elements.html#svg-elements)
-- [設計書: 描画戦略](../design.md#svg描画戦略)
-- [Web Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+> [!note] 外部リンク
+> - [SVG 仕様書](https://www.w3.org/TR/SVG2/)
+> - [React と SVG の統合](https://reactjs.org/docs/dom-elements.html#svg-elements)
+> - [Web Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+
+> [!info] 内部文書
+> - [[design#svg描画戦略|設計書: SVG描画戦略]]
+> - [[0001-use-nextjs-15|ADR-0001: Next.js 15採用]]
+> - [[0003-phyllotaxis-algorithm|ADR-0003: フィロタキシスアルゴリズム]]

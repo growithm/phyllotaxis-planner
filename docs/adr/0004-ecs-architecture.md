@@ -1,8 +1,20 @@
+---
+title: "ADR-0004: ECSアーキテクチャ採用の決定"
+type: adr
+status: approved
+date: 2025-02-08
+decision-makers: [development-team]
+tags: [adr, ecs, entity-component-system, architecture, game-development, data-oriented]
+related:
+  - "[[0003-phyllotaxis-algorithm]]"
+  - "[[0005-event-driven-architecture]]"
+  - "[[design]]"
+---
+
 # ADR-0004: ECSアーキテクチャ採用の決定
 
-## ステータス
-
-承認済み
+> [!info] ステータス
+> 承認済み
 
 ## コンテキスト
 
@@ -245,7 +257,12 @@ export const isPositionComponent = (
 
 ## 関連文書
 
-- [ECS Architecture Pattern](https://en.wikipedia.org/wiki/Entity_component_system)
-- [Game Programming Patterns - Component](https://gameprogrammingpatterns.com/component.html)
-- [設計書: ECS設計](../design.md#ecs-entity-component-system-設計)
-- [TypeScript Advanced Types](https://www.typescriptlang.org/docs/handbook/2/types-from-types.html)
+> [!note] 外部リンク
+> - [ECS Architecture Pattern](https://en.wikipedia.org/wiki/Entity_component_system)
+> - [Game Programming Patterns - Component](https://gameprogrammingpatterns.com/component.html)
+> - [TypeScript Advanced Types](https://www.typescriptlang.org/docs/handbook/2/types-from-types.html)
+
+> [!info] 内部文書
+> - [[design#ecs-entity-component-system-設計|設計書: ECS設計]]
+> - [[0003-phyllotaxis-algorithm|ADR-0003: フィロタキシスアルゴリズム]]
+> - [[0005-event-driven-architecture|ADR-0005: イベント駆動アーキテクチャ]]

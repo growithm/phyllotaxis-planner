@@ -1,8 +1,20 @@
+---
+title: "ADR-0003: フィロタキシスアルゴリズム実装の決定"
+type: adr
+status: approved
+date: 2025-02-08
+decision-makers: [development-team]
+tags: [adr, phyllotaxis, algorithm, mathematics, golden-angle, spiral]
+related:
+  - "[[0002-svg-over-canvas]]"
+  - "[[0004-ecs-architecture]]"
+  - "[[design]]"
+---
+
 # ADR-0003: フィロタキシスアルゴリズム実装の決定
 
-## ステータス
-
-承認済み
+> [!info] ステータス
+> 承認済み
 
 ## コンテキスト
 
@@ -156,7 +168,12 @@ interface PhyllotaxisConfig {
 
 ## 関連文書
 
-- [フィロタキシスの数学的背景](https://en.wikipedia.org/wiki/Phyllotaxis)
-- [黄金角と黄金比](https://en.wikipedia.org/wiki/Golden_angle)
-- [設計書: フィロタキシス実装詳細](../design.md#フィロタキシス実装詳細)
-- [Fibonacci Spirals in Nature](https://www.mathsisfun.com/numbers/nature-golden-ratio-fibonacci.html)
+> [!note] 外部リンク
+> - [フィロタキシスの数学的背景](https://en.wikipedia.org/wiki/Phyllotaxis)
+> - [黄金角と黄金比](https://en.wikipedia.org/wiki/Golden_angle)
+> - [Fibonacci Spirals in Nature](https://www.mathsisfun.com/numbers/nature-golden-ratio-fibonacci.html)
+
+> [!info] 内部文書
+> - [[design#フィロタキシス実装詳細|設計書: フィロタキシス実装詳細]]
+> - [[0002-svg-over-canvas|ADR-0002: SVG over Canvas]]
+> - [[0004-ecs-architecture|ADR-0004: ECSアーキテクチャ]]

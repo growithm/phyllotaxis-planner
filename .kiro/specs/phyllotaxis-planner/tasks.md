@@ -19,7 +19,7 @@
  - Gitコミットとプッシュ（docs: add development workflow documentation）
  - _要件: 設計書のドキュメント戦略に基づく_
 
-- [ ] 0.3 ADR（Architecture Decision Records）の事前作成
+- [x] 0.3 ADR（Architecture Decision Records）の事前作成
  - ADR-0001: Next.js 15採用の決定記録
  - ADR-0002: SVG over Canvasの決定記録
  - ADR-0003: フィロタキシスアルゴリズム実装の決定記録

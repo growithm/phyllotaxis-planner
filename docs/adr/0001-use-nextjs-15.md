@@ -1,8 +1,20 @@
+---
+title: "ADR-0001: Next.js 15の採用"
+type: adr
+status: approved
+date: 2025-02-08
+decision-makers: [development-team]
+tags: [adr, nextjs, frontend, framework, architecture]
+related:
+  - "[[0002-svg-over-canvas]]"
+  - "[[design]]"
+  - "[[requirements]]"
+---
+
 # ADR-0001: Next.js 15の採用
 
-## ステータス
-
-承認済み
+> [!info] ステータス
+> 承認済み
 
 ## コンテキスト
 
@@ -66,6 +78,11 @@ Next.js 15 (App Router) を採用することを決定しました。
 
 ## 関連文書
 
-- [Next.js 15 公式ドキュメント](https://nextjs.org/docs)
-- [App Router Migration Guide](https://nextjs.org/docs/app/building-your-application/upgrading/app-router-migration)
-- [設計書: 技術スタック](../design.md#技術スタック)
+> [!note] 外部リンク
+> - [Next.js 15 公式ドキュメント](https://nextjs.org/docs)
+> - [App Router Migration Guide](https://nextjs.org/docs/app/building-your-application/upgrading/app-router-migration)
+
+> [!info] 内部文書
+> - [[design#技術スタック|設計書: 技術スタック]]
+> - [[0002-svg-over-canvas|ADR-0002: SVG over Canvas]]
+> - [[requirements|要件定義書]]
