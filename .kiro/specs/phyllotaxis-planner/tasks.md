@@ -67,7 +67,7 @@
 
 ## 1. プロジェクト基盤とコア構造の構築
 
-- [ ] 1.1 Next.js 15プロジェクトのセットアップと基本設定
+- [x] 1.1 Next.js 15プロジェクトのセットアップと基本設定
   - Next.js 15 (App Router)、TypeScript、Tailwind CSSでプロジェクトを初期化
   - 基本的なディレクトリ構造を作成
   - 開発環境の設定（ESLint、Prettier、Vitest）
@@ -79,6 +79,8 @@
   - _要件: 6.1, 6.3_
 
 - [ ] 1.2 ECSコア基盤の実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECS設計文書（docs/architecture/ecs/overview.md, docs/architecture/ecs/components.md, docs/architecture/ecs/entities.md, docs/architecture/ecs/world.md）を確認
   - ECSコア（Entity、Component、System）の基底インターフェースを実装
   - ComponentTypesの定義とタイプセーフティの確保
   - 基本的なEntityManagerとSystemManagerを実装
@@ -92,6 +94,8 @@
   - _要件: 設計書のECS設計に基づく_
 
 - [ ] 1.3 イベントバスシステムの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: イベント駆動設計文書（docs/architecture/event-driven-design.md）を確認
   - EventBusインターフェースと実装を作成
   - IdeaEventsとSystemEventsの定義
   - useEventBusカスタムフックの実装
@@ -107,6 +111,8 @@
 ## 2. フィロタキシス計算エンジンの実装
 
 - [ ] 2.1 フィロタキシス数学計算ユーティリティの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: フィロタキシス設計文書（docs/architecture/ecs/overview.md）とAPI仕様書（docs/api/components.md）を確認
   - 黄金角（137.5077640500378度）の定数定義
   - フィロタキシス位置計算関数の実装
   - PhyllotaxisConfigインターフェースの実装
@@ -124,6 +130,8 @@
   - _要件: 3.1, 3.2_
 
 - [ ] 2.2 PhyllotaxisSystemの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECSシステム設計文書（docs/architecture/ecs/systems.md）とAPI仕様書（docs/api/ecs-systems.md）を確認
   - ECSシステムとしてのPhyllotaxisSystemクラス実装
   - エンティティの位置計算とイベント発火
   - 重複回避ロジックの実装
@@ -139,6 +147,8 @@
 ## 3. ECSコンポーネントとエンティティの実装
 
 - [ ] 3.1 ECSコンポーネントインターフェースの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECSコンポーネント設計文書（docs/architecture/ecs/components.md）とAPI仕様書（docs/api/components.md）を確認
   - IPositionComponent、ITextComponent、IAnimationComponentの定義
   - 各コンポーネントのファクトリ関数実装
   - 型ガード関数とヘルパー関数の実装
@@ -152,6 +162,8 @@
   - _要件: 設計書のECSコンポーネント設計に基づく_
 
 - [ ] 3.2 エンティティクラスの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECSエンティティ設計文書（docs/architecture/ecs/entities.md）とAPI仕様書（docs/api/components.md）を確認
   - IdeaEntityとThemeEntityクラスの実装
   - エンティティのコンポーネント管理機能
   - EntityManagerによるエンティティライフサイクル管理
@@ -165,6 +177,8 @@
   - _要件: 1.2, 2.2_
 
 - [ ] 3.3 AnimationSystemの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECSシステム設計文書（docs/architecture/ecs/systems.md）とAPI仕様書（docs/api/ecs-systems.md）を確認
   - アニメーション状態管理システムの実装
   - CSS transitionとの連携
   - アニメーション完了イベントの処理
@@ -180,6 +194,8 @@
 ## 4. 基本UIコンポーネントの実装
 
 - [ ] 4.1 CenterThemeコンポーネントの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: React統合設計文書（docs/architecture/ecs/integration.md）とAPI仕様書（docs/api/components.md）を確認
   - 中心テーマの表示と編集機能
   - プレースホルダーテキストの表示
   - テーマ変更時のイベント発火
@@ -193,6 +209,8 @@
   - _要件: 1.1, 1.2, 1.3_
 
 - [ ] 4.2 AddIdeaFormコンポーネントの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: React統合設計文書（docs/architecture/ecs/integration.md）とAPI仕様書（docs/api/components.md）を確認
   - アイデア追加フォームのUI実装
   - 入力検証（空文字列、文字数制限）
   - エラーメッセージの表示機能
@@ -206,6 +224,8 @@
   - _要件: 2.1, 2.2, 2.3_
 
 - [ ] 4.3 IdeaNodeコンポーネントの実装とテスト
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: React統合設計文書（docs/architecture/ecs/integration.md）とAPI仕様書（docs/api/components.md）を確認
   - 個別アイデアの視覚的表現
   - 植物の葉を連想させるデザイン
   - アニメーション状態の反映
@@ -221,6 +241,8 @@
 ## 5. メインマップコンポーネントとSVG描画
 
 - [ ] 5.1 PhyllotaxisMapコンポーネントの基本実装
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: React統合設計文書（docs/architecture/ecs/integration.md）とAPI仕様書（docs/api/components.md）を確認
   - アプリケーション全体の状態管理
   - SVG描画領域の設定
   - レスポンシブ対応の基本実装
@@ -232,6 +254,8 @@
   - _要件: 5.1, 5.2, 5.3_
 
 - [ ] 5.2 SVG描画システムの実装
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: ECSシステム設計文書（docs/architecture/ecs/systems.md）とAPI仕様書（docs/api/ecs-systems.md）を確認
   - RenderSystemによるSVG要素の動的生成
   - ビューポート適応とスケーリング
   - 座標系変換の実装
@@ -243,6 +267,8 @@
   - _要件: 4.1, 4.2, 4.3_
 
 - [ ] 5.3 アイデア追加フローの統合
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: React統合設計文書（docs/architecture/ecs/integration.md）とイベント駆動設計文書（docs/architecture/event-driven-design.md）を確認
   - フォーム入力からSVG配置までの一連の流れ
   - イベント駆動による各システムの連携
   - エラーハンドリングの統合
@@ -256,6 +282,8 @@
 ## 6. スタイリングとアニメーション
 
 - [ ] 6.1 Tailwind CSSによる基本スタイリング
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: デザインシステム設計文書（docs/architecture/component-diagram.md）を確認
   - 自然で有機的な配色の実装
   - 中心テーマと葉の視覚的差別化
   - レスポンシブデザインの適用
@@ -267,6 +295,8 @@
   - _要件: 4.1, 4.2, 4.3, 5.1, 5.2_
 
 - [ ] 6.2 アニメーション効果の実装
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: アニメーション設計文書（docs/architecture/ecs/systems.md）とCSS設計文書を確認
   - アイデア配置時のスムーズなアニメーション
   - CSS transitionとReact状態変更の連携
   - パフォーマンス最適化（大量アイデア対応）
@@ -278,6 +308,8 @@
   - _要件: 3.3, 6.2_
 
 - [ ] 6.3 モバイル対応とタッチインタラクション
+  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
+  - **設計確認**: レスポンシブデザイン仕様とモバイル対応設計文書を確認
   - モバイルデバイス向けのレイアウト調整
   - タッチ操作の最適化
   - 画面サイズ変更時の動的調整

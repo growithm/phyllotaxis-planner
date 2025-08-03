@@ -20,6 +20,31 @@ related:
 
 ## TypeScript規約
 
+### インポート規約
+
+**パスエイリアス**: 相対パス（`../`）ではなく、パスエイリアス（`@/`）を使用する
+
+```typescript
+// ✅ Good: パスエイリアスを使用
+import { ComponentTypes } from '@/ecs/core/Component';
+import { World } from '@/ecs/core/World';
+import { Button } from '@/components/ui/Button';
+
+// ❌ Bad: 相対パスを使用
+import { ComponentTypes } from '../../../ecs/core/Component';
+import { World } from '../../core/World';
+import { Button } from '../ui/Button';
+```
+
+**利用可能なパスエイリアス**:
+- `@/*` → `./src/*`
+- `@/components/*` → `./src/components/*`
+- `@/lib/*` → `./src/lib/*`
+- `@/types/*` → `./src/types/*`
+- `@/utils/*` → `./src/utils/*`
+- `@/hooks/*` → `./src/hooks/*`
+- `@/styles/*` → `./src/styles/*`
+
 ### 型定義
 
 ```typescript
