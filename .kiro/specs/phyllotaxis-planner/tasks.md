@@ -93,7 +93,7 @@
   - Gitコミットとプッシュ（feat: implement ECS core foundation with tests）
   - _要件: 設計書のECS設計に基づく_
 
-- [ ] 1.3 イベントバスシステムの実装とテスト
+- [x] 1.3 イベントバスシステムの実装とテスト
   - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
   - **設計確認**: イベント駆動設計文書（docs/architecture/event-driven-design.md）を確認
   - EventBusインターフェースと実装を作成

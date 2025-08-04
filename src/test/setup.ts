@@ -1,38 +1,14 @@
-import '@testing-library/jest-dom';
+/**
+ * Vitest テストセットアップファイル
+ */
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
 
-// グローバルなテストセットアップ
-global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
+// React Testing Library のマッチャーを追加
+expect.extend(matchers);
 
-// SVGのモック
-Object.defineProperty(window, 'SVGElement', {
-  writable: true,
-  value: class SVGElement extends Element {
-    getBBox() {
-      return {
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 100,
-      };
-    }
-  },
-});
-
-// matchMediaのモック
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
-  }),
+// 各テスト後にクリーンアップを実行
+afterEach(() => {
+  cleanup();
 });
