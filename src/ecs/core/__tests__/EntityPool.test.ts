@@ -49,7 +49,7 @@ describe('EntityPool', () => {
   describe('getStats', () => {
     it('should return correct statistics', () => {
       const id1 = pool.acquire();
-      const id2 = pool.acquire();
+      pool.acquire();
 
       let stats = pool.getStats();
       expect(stats.active).toBe(2);

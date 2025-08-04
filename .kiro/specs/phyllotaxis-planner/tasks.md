@@ -78,7 +78,7 @@
   - Gitコミットとプッシュ（feat: setup Next.js 15 project with TypeScript and Tailwind）
   - _要件: 6.1, 6.3_
 
-- [ ] 1.2 ECSコア基盤の実装とテスト
+- [x] 1.2 ECSコア基盤の実装とテスト
   - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
   - **設計確認**: ECS設計文書（docs/architecture/ecs/overview.md, docs/architecture/ecs/components.md, docs/architecture/ecs/entities.md, docs/architecture/ecs/world.md）を確認
   - ECSコア（Entity、Component、System）の基底インターフェースを実装

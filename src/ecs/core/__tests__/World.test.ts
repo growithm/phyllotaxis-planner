@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { World } from '@/ecs/core/World';
 import { ComponentTypes, IComponent } from '@/ecs/core/Component';
-import { BaseSystem } from '@/ecs/core/System';
+import { BaseSystem, IWorld } from '@/ecs/core/System';
 import { EntityId } from '@/ecs/core/Entity';
 
 // テスト用コンポーネント
@@ -35,7 +35,7 @@ class TestSystem extends BaseSystem {
   public updateCallCount = 0;
   public lastEntities: EntityId[] = [];
 
-  update(entities: EntityId[], world: any, deltaTime: number): void {
+  update(entities: EntityId[], world: IWorld, _deltaTime: number): void {
     const processableEntities = this.filterEntities(entities, world);
     this.updateCallCount++;
     this.lastEntities = [...processableEntities];

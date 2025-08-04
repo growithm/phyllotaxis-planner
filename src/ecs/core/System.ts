@@ -8,8 +8,8 @@ import { ComponentType } from '@/ecs/core/Component';
 // World インターフェースの前方宣言
 export interface IWorld {
   hasComponent(entityId: EntityId, type: ComponentType): boolean;
-  getComponent<T>(entityId: EntityId, type: ComponentType): T | undefined;
-  addComponent<T>(entityId: EntityId, component: T): void;
+  getComponent<T extends import('@/ecs/core/Component').IComponent>(entityId: EntityId, type: ComponentType): T | undefined;
+  addComponent<T extends import('@/ecs/core/Component').IComponent>(entityId: EntityId, component: T): void;
   removeComponent(entityId: EntityId, type: ComponentType): void;
   getAllEntities(): EntityId[];
 }
