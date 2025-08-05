@@ -25,7 +25,7 @@ export interface ITextComponent extends IComponent {
   fontFamily: string;           // フォントファミリー
   fontWeight: 'normal' | 'bold' | 'lighter' | number; // フォント太さ
   color: string;                // テキスト色（CSS色値）
-  alignment: 'left' | 'center' | 'right'; // テキスト配置
+  textAlign: 'left' | 'center' | 'right'; // テキスト配置
   
   // エンティティ分類用
   entityType: 'idea' | 'theme'; // エンティティタイプ識別子
@@ -45,7 +45,7 @@ export const DEFAULT_TEXT_COMPONENT: Omit<ITextComponent, 'type' | 'content' | '
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
   fontWeight: 'normal',
   color: '#374151',
-  alignment: 'center',
+  textAlign: 'center',
 };
 
 /**

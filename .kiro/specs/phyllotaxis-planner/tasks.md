@@ -131,7 +131,7 @@
 
 ## 3. ECSコンポーネントとエンティティの実装
 
-- [ ] 3.1 ECSコンポーネント設計の見直しと修正
+- [x] 3.1 ECSコンポーネント設計の見直しと修正
   - **現状分析**: 既存のコンポーネント実装（src/ecs/components/）と設計文書の整合性確認
   - **設計課題の特定**:
     - AnimationComponent.tsでの型エラー（AnimationType、EasingType未定義）
