@@ -2,13 +2,14 @@
 title: "ECSコンポーネント設計"
 type: architecture
 category: ecs
-tags: [architecture, ecs, components, data-structures, interfaces]
+tags: [architecture, ecs, components, interfaces, factories]
 related:
-  - "[[overview]]"
+  - "[[entities]]"
   - "[[systems]]"
-  - "[[integration]]"
-  - "[[../component-diagram]]"
+  - "[[overview]]"
+  - "[[../../api/ecs-components]]"
 created: 2025-02-08
+updated: 2025-02-08
 ---
 
 # ECSコンポーネント設計
@@ -16,322 +17,249 @@ created: 2025-02-08
 > [!info] 概要
 > Phyllotaxis PlannerのECSアーキテクチャにおけるコンポーネント設計の詳細を説明します。
 
-## コンポーネント設計原則
+## 設計原則
 
 ### 🎯 基本原則
 
-> [!warning] データのみ保持
-> コンポーネントはデータのみを保持し、メソッドやロジックは一切持たない
+> [!note] データのみ保持
+> コンポーネントはデータのみを保持し、ロジックは一切含まない
 
 ```typescript
 // ✅ 正しいコンポーネント設計
-interface IPositionComponent {
-  readonly type: 'position';
+interface IPositionComponent extends IComponent {
+  readonly type: typeof ComponentTypes.POSITION;
   x: number;
   y: number;
   angle: number;
+  // データのみ
 }
 
 // ❌ 間違ったコンポーネント設計
-interface BadComponent {
-  x: number;
-  y: number;
-  updatePosition(): void; // ロジックを持ってはいけない
+interface BadComponent extends IComponent {
+  calculateDistance(): number; // ロジックを含んではいけない
 }
 ```
 
-### 🏗️ コンポーネント基底構造
+### 🏗️ コンポーネント構造
 
 ```typescript
-// ecs/core/Component.ts
-interface IComponent {
+// 基底インターフェース
+export interface IComponent {
   readonly type: ComponentType;
 }
 
-// コンポーネントタイプの定義
+// コンポーネントタイプ定義
 export const ComponentTypes = {
   POSITION: 'position',
   TEXT: 'text',
   VISUAL: 'visual',
   ANIMATION: 'animation',
-  INTERACTION: 'interaction'
 } as const;
-
-export type ComponentType = typeof ComponentTypes[keyof typeof ComponentTypes];
 ```
 
-## コンポーネント詳細設計
+## コンポーネント詳細仕様
 
 ### 📍 PositionComponent
 
-> [!note] 責務
-> エンティティの空間的位置情報を管理
+**責務**: エンティティの位置情報とフィロタキシス配置データを管理
 
 ```typescript
-// ecs/components/interfaces/IPositionComponent.ts
 interface IPositionComponent extends IComponent {
-  readonly type: typeof ComponentTypes.POSITION;
+  // 基本位置情報
   x: number;                    // X座標（SVG座標系）
   y: number;                    // Y座標（SVG座標系）
-  angle: number;                // 回転角度（度）
+  
+  // フィロタキシス情報
+  angle: number;                // 角度（度）
   radius: number;               // 中心からの距離
-  scale: number;                // スケール倍率
+  index: number;                // 配置インデックス（0から始まる）
+  
+  // 表示制御
+  scale: number;                // スケール（1.0が基準）
   zIndex: number;               // 描画順序
+  
+  // アニメーション用
+  targetX?: number;             // 目標X座標
+  targetY?: number;             // 目標Y座標
+  isAnimating: boolean;         // アニメーション中フラグ
 }
-
-// ファクトリ関数
-export const createPositionComponent = (
-  x: number = 0,
-  y: number = 0,
-  angle: number = 0,
-  radius: number = 0,
-  scale: number = 1,
-  zIndex: number = 0
-): IPositionComponent => ({
-  type: ComponentTypes.POSITION,
-  x, y, angle, radius, scale, zIndex
-});
 ```
 
-**使用例:**
-```typescript
-// 中心テーマの位置
-const centerPosition = createPositionComponent(400, 300, 0, 0, 1.5, 10);
-
-// アイデアノードの位置
-const ideaPosition = createPositionComponent(450, 250, 45, 80, 1.0, 1);
-```
+**特徴**:
+- フィロタキシス配置用の`index`、`angle`、`radius`
+- アニメーション目標位置の`targetX`、`targetY`
+- 描画順序制御の`zIndex`
 
 ### 📝 TextComponent
 
-> [!note] 責務
-> エンティティのテキスト情報を管理
+**責務**: テキスト内容と表示設定、エンティティタイプ識別を管理
 
 ```typescript
-// ecs/components/interfaces/ITextComponent.ts
 interface ITextComponent extends IComponent {
-  readonly type: typeof ComponentTypes.TEXT;
-  content: string;              // テキスト内容
-  maxLength: number;            // 最大文字数
+  // テキスト内容
+  content: string;              // 表示テキスト
+  maxLength: number;            // 最大文字数制限
+  
+  // 編集制御
   isEditable: boolean;          // 編集可能フラグ
+  placeholder?: string;         // プレースホルダー
+  
+  // 表示設定
   fontSize: number;             // フォントサイズ（px）
   fontFamily: string;           // フォントファミリー
-  color: string;                // テキスト色（CSS色値）
-  alignment: TextAlignment;     // テキスト配置
+  fontWeight: 'normal' | 'bold' | 'lighter' | number;
+  color: string;                // テキスト色
+  alignment: 'left' | 'center' | 'right';
+  
+  // エンティティ分類用
+  entityType: 'idea' | 'theme'; // 重要：エンティティタイプ識別子
+  
+  // 拡張用
+  tags?: string[];              // タグ
+  category?: string;            // カテゴリ
 }
-
-type TextAlignment = 'left' | 'center' | 'right';
-
-// ファクトリ関数
-export const createTextComponent = (
-  content: string,
-  options: Partial<Omit<ITextComponent, 'type' | 'content'>> = {}
-): ITextComponent => ({
-  type: ComponentTypes.TEXT,
-  content: content.slice(0, options.maxLength || 100),
-  maxLength: 100,
-  isEditable: true,
-  fontSize: 14,
-  fontFamily: 'Inter, sans-serif',
-  color: '#374151',
-  alignment: 'center',
-  ...options
-});
 ```
 
-**使用例:**
-```typescript
-// アイデアテキスト
-const ideaText = createTextComponent('新しいアイデア', {
-  fontSize: 14,
-  color: '#1F2937'
-});
-
-// 中心テーマテキスト
-const themeText = createTextComponent('メインテーマ', {
-  fontSize: 18,
-  fontFamily: 'Inter, sans-serif',
-  color: '#111827',
-  isEditable: true
-});
-```
+**特徴**:
+- `entityType`によるエンティティタイプ識別
+- テーマとアイデアで異なるデフォルト値
+- 将来の拡張を考慮した`tags`、`category`
 
 ### 🎨 VisualComponent
 
-> [!note] 責務
-> エンティティの視覚的表現を管理
+**責務**: SVG描画とスタイリング情報を管理
 
 ```typescript
-// ecs/components/interfaces/IVisualComponent.ts
 interface IVisualComponent extends IComponent {
-  readonly type: typeof ComponentTypes.VISUAL;
-  shape: ShapeType;             // 形状タイプ
-  fillColor: string;            // 塗りつぶし色
-  strokeColor: string;          // 境界線色
-  strokeWidth: number;          // 境界線幅
-  opacity: number;              // 透明度（0-1）
+  // 基本表示制御
   visible: boolean;             // 表示フラグ
-  cssClasses: string[];         // 追加CSSクラス
+  opacity: number;              // 透明度（0.0-1.0）
+  
+  // 形状設定
+  shape: 'circle' | 'ellipse' | 'rect' | 'leaf' | 'custom';
+  width: number;                // 幅（px）
+  height: number;               // 高さ（px）
+  
+  // 色設定
+  fillColor: string;            // 塗りつぶし色
+  strokeColor: string;          // 枠線色
+  strokeWidth: number;          // 枠線幅
+  
+  // 高度な視覚効果
+  gradient?: GradientConfig;    // グラデーション
+  shadow?: ShadowConfig;        // 影
+  
+  // CSS連携
+  cssClasses: string[];         // CSSクラス
   customStyles: Record<string, string>; // カスタムスタイル
+  
+  // SVG特有設定
+  svgPath?: string;             // カスタムSVGパス
+  svgAttributes?: Record<string, string>; // SVG属性
 }
-
-type ShapeType = 'circle' | 'ellipse' | 'rect' | 'leaf' | 'custom';
-
-// ファクトリ関数
-export const createVisualComponent = (
-  shape: ShapeType = 'leaf',
-  fillColor: string = '#10B981',
-  strokeColor: string = '#059669',
-  options: Partial<Omit<IVisualComponent, 'type' | 'shape' | 'fillColor' | 'strokeColor'>> = {}
-): IVisualComponent => ({
-  type: ComponentTypes.VISUAL,
-  shape,
-  fillColor,
-  strokeColor,
-  strokeWidth: 2,
-  opacity: 1,
-  visible: true,
-  cssClasses: [],
-  customStyles: {},
-  ...options
-});
 ```
 
-**使用例:**
-```typescript
-// アイデアノードの葉っぱ形状
-const leafVisual = createVisualComponent('leaf', '#10B981', '#059669', {
-  opacity: 0.9,
-  cssClasses: ['idea-leaf', 'hover-effect']
-});
-
-// 中心テーマの円形状
-const circleVisual = createVisualComponent('circle', '#F3F4F6', '#D1D5DB', {
-  strokeWidth: 3,
-  cssClasses: ['center-theme']
-});
-```
+**特徴**:
+- 豊富な形状オプション（`leaf`形状でアイデアを表現）
+- グラデーションと影効果のサポート
+- CSS統合とカスタムSVGパス
 
 ### 🎬 AnimationComponent
 
-> [!note] 責務
-> エンティティのアニメーション状態を管理
+**責務**: アニメーション状態とCSS連携を管理
 
 ```typescript
-// ecs/components/interfaces/IAnimationComponent.ts
 interface IAnimationComponent extends IComponent {
-  readonly type: typeof ComponentTypes.ANIMATION;
-  isAnimating: boolean;         // アニメーション中フラグ
-  duration: number;             // アニメーション時間（ms）
+  // アニメーション状態
+  isAnimating: boolean;         // 実行中フラグ
+  animationType: AnimationType; // アニメーションタイプ
+  
+  // タイミング制御
+  duration: number;             // 時間（ミリ秒）
+  delay: number;                // 開始遅延
   easing: EasingType;           // イージング関数
-  progress: number;             // 進行状況（0-1）
-  startTime: number;            // 開始時刻（timestamp）
-  animationType: AnimationType; // アニメーション種類
+  
+  // 進行状況
+  progress: number;             // 進行状況（0.0-1.0）
+  startTime?: number;           // 開始時刻
+  endTime?: number;             // 終了予定時刻
+  
+  // 繰り返し制御
   loop: boolean;                // ループフラグ
-  delay: number;                // 開始遅延（ms）
+  loopCount: number;            // ループ回数
+  currentLoop: number;          // 現在のループ
+  
+  // CSS連携
+  cssTransition?: string;       // CSS transitionプロパティ
+  cssClasses: string[];         // アニメーション用CSSクラス
+  
+  // コールバック
+  onStart?: () => void;         // 開始時
+  onComplete?: () => void;      // 完了時
+  onLoop?: () => void;          // ループ時
 }
+```
 
-type AnimationType = 'fadeIn' | 'fadeOut' | 'slideIn' | 'slideOut' | 'scaleIn' | 'scaleOut' | 'bounce';
-type EasingType = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'bounce';
+**特徴**:
+- CSS transitionとの完全統合
+- 詳細な進行状況追跡
+- コールバック機能
 
-// ファクトリ関数
-export const createAnimationComponent = (
-  animationType: AnimationType = 'fadeIn',
-  duration: number = 500,
-  easing: EasingType = 'ease-out',
-  options: Partial<Omit<IAnimationComponent, 'type' | 'animationType' | 'duration' | 'easing'>> = {}
-): IAnimationComponent => ({
-  type: ComponentTypes.ANIMATION,
+## ファクトリパターン
+
+### 🏭 基本ファクトリ関数
+
+```typescript
+// 基本的な作成
+export const createPositionComponent = (
+  x: number = 0,
+  y: number = 0,
+  options: Partial<Omit<IPositionComponent, 'type' | 'x' | 'y'>> = {}
+): IPositionComponent => ({
+  type: ComponentTypes.POSITION,
+  ...DEFAULT_POSITION_COMPONENT,
+  x,
+  y,
+  ...options,
+});
+
+// 特殊用途ファクトリ
+export const createPhyllotaxisPositionComponent = (
+  index: number,
+  angle: number,
+  radius: number,
+  x: number,
+  y: number
+): IPositionComponent => ({
+  type: ComponentTypes.POSITION,
+  x, y, angle, radius, index,
+  scale: 1.0,
+  zIndex: index, // インデックスをzIndexとして使用
   isAnimating: false,
-  duration,
-  easing,
-  progress: 0,
-  startTime: 0,
-  animationType,
-  loop: false,
-  delay: 0,
-  ...options
 });
 ```
 
-**使用例:**
-```typescript
-// アイデア追加時のフェードインアニメーション
-const fadeInAnimation = createAnimationComponent('fadeIn', 600, 'ease-out');
+### 🎯 エンティティタイプ別ファクトリ
 
-// バウンス効果
-const bounceAnimation = createAnimationComponent('bounce', 800, 'bounce', {
-  loop: true
-});
+```typescript
+// テーマ用
+export const createThemeTextComponent = (
+  content: string,
+  options: Partial<Omit<ITextComponent, 'type' | 'content' | 'entityType'>> = {}
+): ITextComponent => createTextComponent(content, 'theme', options);
+
+// アイデア用
+export const createIdeaTextComponent = (
+  content: string,
+  options: Partial<Omit<ITextComponent, 'type' | 'content' | 'entityType'>> = {}
+): ITextComponent => createTextComponent(content, 'idea', options);
 ```
 
-### 🖱️ InteractionComponent
+## 型ガードとヘルパー
 
-> [!note] 責務
-> エンティティのユーザーインタラクションを管理
-
-```typescript
-// ecs/components/interfaces/IInteractionComponent.ts
-interface IInteractionComponent extends IComponent {
-  readonly type: typeof ComponentTypes.INTERACTION;
-  clickable: boolean;           // クリック可能フラグ
-  hoverable: boolean;           // ホバー可能フラグ
-  draggable: boolean;           // ドラッグ可能フラグ
-  selectable: boolean;          // 選択可能フラグ
-  isSelected: boolean;          // 選択状態
-  isHovered: boolean;           // ホバー状態
-  isDragging: boolean;          // ドラッグ状態
-  cursor: CursorType;           // カーソル種類
-  tabIndex: number;             // タブインデックス
-  ariaLabel?: string;           // アクセシビリティラベル
-}
-
-type CursorType = 'default' | 'pointer' | 'grab' | 'grabbing' | 'move' | 'text';
-
-// ファクトリ関数
-export const createInteractionComponent = (
-  options: Partial<Omit<IInteractionComponent, 'type'>> = {}
-): IInteractionComponent => ({
-  type: ComponentTypes.INTERACTION,
-  clickable: true,
-  hoverable: true,
-  draggable: false,
-  selectable: true,
-  isSelected: false,
-  isHovered: false,
-  isDragging: false,
-  cursor: 'pointer',
-  tabIndex: 0,
-  ...options
-});
-```
-
-**使用例:**
-```typescript
-// アイデアノードのインタラクション
-const ideaInteraction = createInteractionComponent({
-  clickable: true,
-  hoverable: true,
-  selectable: true,
-  ariaLabel: 'アイデアノード'
-});
-
-// 中心テーマのインタラクション
-const themeInteraction = createInteractionComponent({
-  clickable: true,
-  hoverable: true,
-  draggable: false,
-  cursor: 'text',
-  ariaLabel: '中心テーマ'
-});
-```
-
-## コンポーネント型ガード
-
-### 🔍 型安全なアクセス
+### 🛡️ 型ガード関数
 
 ```typescript
-// ecs/components/index.ts
 export const isPositionComponent = (
   component: IComponent
 ): component is IPositionComponent =>
@@ -341,297 +269,128 @@ export const isTextComponent = (
   component: IComponent
 ): component is ITextComponent => 
   component.type === ComponentTypes.TEXT;
-
-export const isVisualComponent = (
-  component: IComponent
-): component is IVisualComponent => 
-  component.type === ComponentTypes.VISUAL;
-
-export const isAnimationComponent = (
-  component: IComponent
-): component is IAnimationComponent => 
-  component.type === ComponentTypes.ANIMATION;
-
-export const isInteractionComponent = (
-  component: IComponent
-): component is IInteractionComponent => 
-  component.type === ComponentTypes.INTERACTION;
 ```
 
-### 🛠️ ヘルパー関数
+### 🔧 ヘルパー関数
 
 ```typescript
-// World経由での安全なコンポーネント取得
+// World経由でのコンポーネント取得
 export const getPositionComponent = (
-  entityId: EntityId, 
-  world: World
+  world: IWorld,
+  entityId: EntityId
 ): IPositionComponent | undefined => {
   const component = world.getComponent(entityId, ComponentTypes.POSITION);
   return component && isPositionComponent(component) ? component : undefined;
 };
 
-export const getTextComponent = (
-  entityId: EntityId, 
-  world: World
-): ITextComponent | undefined => {
-  const component = world.getComponent(entityId, ComponentTypes.TEXT);
-  return component && isTextComponent(component) ? component : undefined;
-};
-
-// 必須コンポーネントの存在チェック
-export const hasRequiredComponents = (
-  entityId: EntityId,
-  world: World,
-  requiredTypes: ComponentType[]
+// エンティティタイプ判定
+export const isThemeEntity = (
+  world: IWorld,
+  entityId: EntityId
 ): boolean => {
-  return requiredTypes.every(type => world.hasComponent(entityId, type));
+  const textComponent = getTextComponent(world, entityId);
+  return textComponent?.entityType === 'theme';
 };
 ```
 
-## コンポーネント組み合わせパターン
+## デフォルト値戦略
 
-### 🎭 エンティティブループリント
+### 📋 階層化されたデフォルト値
 
 ```typescript
-// ecs/blueprints/EntityBlueprints.ts
-interface EntityBlueprint {
-  name: string;
-  components: ComponentType[];
-  create(entityId: EntityId, world: World, ...args: any[]): void;
+// 基本デフォルト値
+export const DEFAULT_TEXT_COMPONENT = {
+  maxLength: 100,
+  isEditable: true,
+  fontSize: 14,
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+  fontWeight: 'normal',
+  color: '#374151',
+  alignment: 'center',
+};
+
+// テーマ用デフォルト値（基本値を拡張）
+export const DEFAULT_THEME_TEXT_COMPONENT = {
+  ...DEFAULT_TEXT_COMPONENT,
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#1F2937',
+  placeholder: 'テーマを入力してください',
+};
+```
+
+## 使用例
+
+### 💡 実際の使用パターン
+
+```typescript
+// エンティティ作成時
+const world = new World();
+
+// テーマエンティティの作成
+const themeEntityId = world.createEntity();
+world.addComponent(themeEntityId, createThemeTextComponent('プロジェクト計画'));
+world.addComponent(themeEntityId, createThemeVisualComponent());
+world.addComponent(themeEntityId, createPositionComponent(400, 300));
+
+// アイデアエンティティの作成
+const ideaEntityId = world.createEntity();
+world.addComponent(ideaEntityId, createIdeaTextComponent('要件定義'));
+world.addComponent(ideaEntityId, createIdeaVisualComponent());
+world.addComponent(ideaEntityId, createPhyllotaxisPositionComponent(0, 0, 50, 450, 300));
+world.addComponent(ideaEntityId, createPositionAnimationComponent(300));
+
+// コンポーネント取得と操作
+const textComponent = getTextComponent(world, ideaEntityId);
+if (textComponent) {
+  textComponent.content = '更新された要件定義';
 }
 
-// アイデアエンティティのブループリント
-export const IdeaBlueprint: EntityBlueprint = {
-  name: 'idea',
-  components: [
-    ComponentTypes.POSITION,
-    ComponentTypes.TEXT,
-    ComponentTypes.VISUAL,
-    ComponentTypes.ANIMATION,
-    ComponentTypes.INTERACTION
-  ],
-  
-  create(entityId: EntityId, world: World, text: string, position?: { x: number; y: number }) {
-    world.addComponent(entityId, createTextComponent(text));
-    world.addComponent(entityId, createPositionComponent(
-      position?.x || 0, 
-      position?.y || 0
-    ));
-    world.addComponent(entityId, createVisualComponent('leaf'));
-    world.addComponent(entityId, createAnimationComponent('fadeIn'));
-    world.addComponent(entityId, createInteractionComponent());
-  }
-};
-
-// テーマエンティティのブループリント
-export const ThemeBlueprint: EntityBlueprint = {
-  name: 'theme',
-  components: [
-    ComponentTypes.POSITION,
-    ComponentTypes.TEXT,
-    ComponentTypes.VISUAL,
-    ComponentTypes.INTERACTION
-  ],
-  
-  create(entityId: EntityId, world: World, theme: string) {
-    world.addComponent(entityId, createTextComponent(theme, {
-      fontSize: 18,
-      color: '#1F2937',
-      isEditable: true
-    }));
-    
-    world.addComponent(entityId, createPositionComponent(0, 0, 0, 0, 1.5, 10));
-    world.addComponent(entityId, createVisualComponent('circle', '#F3F4F6', '#D1D5DB'));
-    world.addComponent(entityId, createInteractionComponent({
-      cursor: 'text',
-      ariaLabel: '中心テーマ'
-    }));
-  }
-};
-```
-
-## パフォーマンス考慮事項
-
-### 🚀 メモリ効率
-
-```typescript
-// コンポーネントプールによるメモリ最適化
-class ComponentPool<T extends IComponent> {
-  private pool: T[] = [];
-  private createFn: () => T;
-  
-  constructor(createFn: () => T, initialSize = 10) {
-    this.createFn = createFn;
-    // 初期プールを作成
-    for (let i = 0; i < initialSize; i++) {
-      this.pool.push(createFn());
-    }
-  }
-  
-  acquire(): T {
-    return this.pool.pop() || this.createFn();
-  }
-  
-  release(component: T): void {
-    this.resetComponent(component);
-    this.pool.push(component);
-  }
-  
-  private resetComponent(component: T): void {
-    // コンポーネントの状態をデフォルトにリセット
-    switch (component.type) {
-      case ComponentTypes.POSITION:
-        const pos = component as IPositionComponent;
-        pos.x = pos.y = pos.angle = pos.radius = 0;
-        pos.scale = 1;
-        pos.zIndex = 0;
-        break;
-      case ComponentTypes.ANIMATION:
-        const anim = component as IAnimationComponent;
-        anim.isAnimating = false;
-        anim.progress = 0;
-        anim.startTime = 0;
-        break;
-    }
-  }
+// エンティティタイプ判定
+if (isIdeaEntity(world, ideaEntityId)) {
+  console.log('これはアイデアエンティティです');
 }
-
-// 使用例
-const positionPool = new ComponentPool(() => createPositionComponent(), 50);
-const animationPool = new ComponentPool(() => createAnimationComponent(), 50);
 ```
 
-### 📊 データ局所性
+## 拡張性
 
-```mermaid
-graph TB
-    subgraph "Memory Layout"
-        subgraph "Position Components"
-            P1[Entity1: x,y,angle]
-            P2[Entity2: x,y,angle]
-            P3[Entity3: x,y,angle]
-        end
-        
-        subgraph "Text Components"
-            T1[Entity1: content,fontSize]
-            T2[Entity2: content,fontSize]
-            T3[Entity3: content,fontSize]
-        end
-        
-        subgraph "Visual Components"
-            V1[Entity1: shape,color]
-            V2[Entity2: shape,color]
-            V3[Entity3: shape,color]
-        end
-    end
-    
-    subgraph "System Processing"
-        PS[PhyllotaxisSystem<br/>Position配列を順次処理]
-        RS[RenderSystem<br/>Position+Visual配列を処理]
-    end
-    
-    P1 --> PS
-    P2 --> PS
-    P3 --> PS
-    
-    P1 --> RS
-    V1 --> RS
-```
+### 🔮 将来の拡張ポイント
 
-## テスト戦略
+1. **新しいコンポーネントタイプ**:
+   ```typescript
+   // 将来追加予定
+   INTERACTION: 'interaction',  // ユーザーインタラクション
+   PHYSICS: 'physics',          // 物理演算
+   AUDIO: 'audio',              // 音響効果
+   ```
 
-### 🧪 コンポーネントテスト
+   > [!note] 実装状況
+   > 現在は4つのコアコンポーネント（Position, Text, Visual, Animation）が実装済みです。
+   > 各コンポーネントには包括的な単体テストが含まれており、86個のテストケースで品質を保証しています。
 
-```typescript
-describe('PositionComponent', () => {
-  it('should create with default values', () => {
-    const position = createPositionComponent();
-    
-    expect(position.type).toBe(ComponentTypes.POSITION);
-    expect(position.x).toBe(0);
-    expect(position.y).toBe(0);
-    expect(position.scale).toBe(1);
-  });
-  
-  it('should create with custom values', () => {
-    const position = createPositionComponent(100, 200, 45, 80, 1.5, 2);
-    
-    expect(position.x).toBe(100);
-    expect(position.y).toBe(200);
-    expect(position.angle).toBe(45);
-    expect(position.radius).toBe(80);
-    expect(position.scale).toBe(1.5);
-    expect(position.zIndex).toBe(2);
-  });
-});
+2. **コンポーネント間の関係**:
+   ```typescript
+   interface IRelationComponent extends IComponent {
+     parentId?: EntityId;
+     childIds: EntityId[];
+     relationshipType: 'hierarchy' | 'association' | 'dependency';
+   }
+   ```
 
-describe('TextComponent', () => {
-  it('should truncate content to maxLength', () => {
-    const longText = 'a'.repeat(150);
-    const text = createTextComponent(longText, { maxLength: 100 });
-    
-    expect(text.content.length).toBe(100);
-  });
-  
-  it('should apply custom options', () => {
-    const text = createTextComponent('Test', {
-      fontSize: 16,
-      color: '#FF0000',
-      alignment: 'left'
-    });
-    
-    expect(text.fontSize).toBe(16);
-    expect(text.color).toBe('#FF0000');
-    expect(text.alignment).toBe('left');
-  });
-});
-```
-
-### 🔗 統合テスト
-
-```typescript
-describe('Component Integration', () => {
-  it('should work with World system', () => {
-    const world = new World();
-    const entityId = world.createEntity();
-    
-    // コンポーネント追加
-    world.addComponent(entityId, createPositionComponent(100, 200));
-    world.addComponent(entityId, createTextComponent('Test'));
-    
-    // コンポーネント取得
-    const position = getPositionComponent(entityId, world);
-    const text = getTextComponent(entityId, world);
-    
-    expect(position?.x).toBe(100);
-    expect(text?.content).toBe('Test');
-  });
-  
-  it('should support blueprint creation', () => {
-    const world = new World();
-    const factory = new EntityFactory();
-    factory.registerBlueprint(IdeaBlueprint);
-    
-    const entityId = factory.create('idea', world, 'Test Idea');
-    
-    expect(hasRequiredComponents(entityId, world, IdeaBlueprint.components)).toBe(true);
-  });
-});
-```
+3. **動的プロパティ**:
+   ```typescript
+   interface IDynamicComponent extends IComponent {
+     properties: Map<string, any>;
+     schema: PropertySchema;
+   }
+   ```
 
 ## 関連文書
 
-> [!info] ECS設計文書
-> - [[overview|ECS概要]]
-> - [[world|World設計]]
+> [!info] 関連設計文書
 > - [[entities|エンティティ設計]]
 > - [[systems|システム設計]]
-> - [[integration|React統合とパフォーマンス]]
+> - [[overview|ECS概要]]
 
-> [!note] アーキテクチャ文書
-> - [[component-diagram|コンポーネント関係図]]
-> - [[data-flow|データフロー図]]
-
-> [!info] 実装ガイド
-> - [[design#ecs-entity-component-system-設計|設計書: ECS設計]]
-> - [[tasks|実装計画]]
+> [!note] API仕様
+> - [[../../api/ecs-components|コンポーネントAPI仕様]]

@@ -7,11 +7,20 @@ import { ComponentType } from '@/ecs/core/Component';
 
 // World インターフェースの前方宣言
 export interface IWorld {
+  // エンティティ管理
+  createEntity(): EntityId;
+  destroyEntity(entityId: EntityId): boolean;
+  hasEntity(entityId: EntityId): boolean;
+  getAllEntities(): EntityId[];
+  
+  // コンポーネント管理
   hasComponent(entityId: EntityId, type: ComponentType): boolean;
   getComponent<T extends import('@/ecs/core/Component').IComponent>(entityId: EntityId, type: ComponentType): T | undefined;
   addComponent<T extends import('@/ecs/core/Component').IComponent>(entityId: EntityId, component: T): void;
   removeComponent(entityId: EntityId, type: ComponentType): void;
-  getAllEntities(): EntityId[];
+  
+  // バージョン管理
+  getVersion?(): number;
 }
 
 /**

@@ -110,7 +110,7 @@
 
 ## 2. フィロタキシス計算エンジンの実装
 
-- [ ] 2.1 フィロタキシス数学計算ユーティリティの実装とテスト
+- [x] 2.1 フィロタキシス数学計算ユーティリティの実装とテスト
   - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
   - **設計確認**: フィロタキシス設計文書（docs/architecture/ecs/overview.md）とAPI仕様書（docs/api/components.md）を確認
   - 黄金角（137.5077640500378度）の定数定義
@@ -129,67 +129,195 @@
   - Gitコミットとプッシュ（feat: implement phyllotaxis mathematical utilities with tests）
   - _要件: 3.1, 3.2_
 
-- [ ] 2.2 PhyllotaxisSystemの実装とテスト
-  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
-  - **設計確認**: ECSシステム設計文書（docs/architecture/ecs/systems.md）とAPI仕様書（docs/api/ecs-systems.md）を確認
-  - ECSシステムとしてのPhyllotaxisSystemクラス実装
-  - エンティティの位置計算とイベント発火
-  - 重複回避ロジックの実装
-  - PhyllotaxisSystemの単体テスト実装（システム実行、位置計算、イベント発火）
-  - **動作確認**: PhyllotaxisSystemがECSシステムとして正常に登録・実行されることを確認
-  - **動作確認**: エンティティの位置計算が正確に行われることを確認
-  - **動作確認**: 重複回避ロジックが適切に動作することを確認
-  - **動作確認**: `npm run test`でPhyllotaxisSystemのテストが全て通ることを確認
-  - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement PhyllotaxisSystem for ECS with tests）
-  - _要件: 3.1, 3.2_
-
 ## 3. ECSコンポーネントとエンティティの実装
 
-- [ ] 3.1 ECSコンポーネントインターフェースの実装とテスト
-  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
-  - **設計確認**: ECSコンポーネント設計文書（docs/architecture/ecs/components.md）とAPI仕様書（docs/api/components.md）を確認
-  - IPositionComponent、ITextComponent、IAnimationComponentの定義
-  - 各コンポーネントのファクトリ関数実装
-  - 型ガード関数とヘルパー関数の実装
-  - コンポーネントインターフェースの単体テスト実装（ファクトリ関数、型ガード、ヘルパー関数）
-  - **動作確認**: 各コンポーネントインターフェースが正しく型定義されていることを確認
+- [ ] 3.1 ECSコンポーネント設計の見直しと修正
+  - **現状分析**: 既存のコンポーネント実装（src/ecs/components/）と設計文書の整合性確認
+  - **設計課題の特定**:
+    - AnimationComponent.tsでの型エラー（AnimationType、EasingType未定義）
+    - コンポーネント間の依存関係と整合性の問題
+    - ヘルパー関数とファクトリ関数の不整合
+    - 型定義の不完全性とインポートエラー
+  - **型定義の修正**:
+    - AnimationType、EasingTypeの定義と適切な配置
+    - 全コンポーネントの型安全性確保
+    - インポート/エクスポートの整理
+  - **設計文書の更新**:
+    - docs/architecture/ecs/components.md の実装に合わせた修正
+    - docs/api/ecs-components.md の作成または更新
+    - 実装済み機能の正確な反映
+  - **コンポーネント実装の調整**:
+    - 既存の4つのコンポーネント（Position, Text, Visual, Animation）の最終調整
+    - ファクトリ関数とヘルパー関数の統一
+    - 型ガード関数の完全性確保
+  - **テストの実装**:
+    - 各コンポーネントの単体テスト作成
+    - ファクトリ関数、型ガード、ヘルパー関数のテスト
+  - **動作確認**: 全コンポーネントファイルでTypeScriptエラーが解消されることを確認
   - **動作確認**: ファクトリ関数で適切なコンポーネントオブジェクトが生成されることを確認
   - **動作確認**: 型ガード関数が正しくコンポーネントタイプを判定することを確認
-  - **動作確認**: `npm run test`でコンポーネントインターフェースのテストが全て通ることを確認
+  - **動作確認**: `npm run test`でコンポーネントのテストが全て通ることを確認
   - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement ECS component interfaces with tests）
-  - _要件: 設計書のECSコンポーネント設計に基づく_
+  - Gitコミットとプッシュ（fix: refine ECS component design and resolve type errors）
+  - _要件: 実装済みコンポーネントの設計整合性確保_
 
-- [ ] 3.2 エンティティクラスの実装とテスト
+- [ ] 3.2 エンティティ管理システムの実装とテスト
   - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
-  - **設計確認**: ECSエンティティ設計文書（docs/architecture/ecs/entities.md）とAPI仕様書（docs/api/components.md）を確認
-  - IdeaEntityとThemeEntityクラスの実装
-  - エンティティのコンポーネント管理機能
-  - EntityManagerによるエンティティライフサイクル管理
-  - エンティティクラスの単体テスト実装（作成・初期化、コンポーネント管理、ライフサイクル）
-  - **動作確認**: IdeaEntityとThemeEntityが正常に作成・初期化されることを確認
-  - **動作確認**: エンティティにコンポーネントの追加・削除・取得が正常に動作することを確認
-  - **動作確認**: EntityManagerでエンティティのライフサイクル管理が適切に動作することを確認
-  - **動作確認**: `npm run test`でエンティティクラスのテストが全て通ることを確認
+  - **設計確認**: ECSエンティティ設計文書（docs/architecture/ecs/entities.md）とAPI仕様書（docs/api/ecs-entities.md）を確認
+  - EntityFactory.ts - メインのエンティティ作成機能の実装
+    - createThemeEntity()とcreateIdeaEntity()メソッド
+    - CreateEntityOptionsインターフェースの実装
+    - エンティティ作成制限のチェック機能
+    - バッチ作成とクローン機能
+  - EntityTypes.ts - エンティティタイプ管理機能の実装
+    - EntityTypeManagerクラスの実装
+    - ENTITY_TYPE_CONFIGの定義
+    - タイプ識別とキャッシュ機能
+    - 作成制限と統計情報の管理
+  - EntityManager.ts - 高レベルエンティティ管理機能の実装
+    - エンティティクエリシステム
+    - インデックス管理と並び替え機能
+    - 整合性チェックと自動修復機能
+    - 統計情報とパフォーマンス監視
+  - 各クラスの単体テスト実装（作成・削除、クエリ、制限チェック、統計情報）
+  - **動作確認**: EntityFactoryでテーマとアイデアエンティティが正常に作成されることを確認
+  - **動作確認**: EntityTypeManagerでタイプ識別と制限管理が適切に動作することを確認
+  - **動作確認**: EntityManagerでクエリとライフサイクル管理が適切に動作することを確認
+  - **動作確認**: `npm run test`でエンティティ管理システムのテストが全て通ることを確認
   - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement entity classes and manager with tests）
+  - Gitコミットとプッシュ（feat: implement entity management system with tests）
   - _要件: 1.2, 2.2_
 
-- [ ] 3.3 AnimationSystemの実装とテスト
-  - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
-  - **設計確認**: ECSシステム設計文書（docs/architecture/ecs/systems.md）とAPI仕様書（docs/api/ecs-systems.md）を確認
-  - アニメーション状態管理システムの実装
-  - CSS transitionとの連携
-  - アニメーション完了イベントの処理
-  - AnimationSystemの単体テスト実装（システム実行、CSS連携、イベント処理）
+- [ ] 3.3 ECSシステム設計の見直しと基盤実装
+  - **現状分析**: 既存のECSシステム実装（src/ecs/systems/）と設計文書の整合性確認
+  - **設計課題の特定**:
+    - システム基底クラスとインターフェースの不整合
+    - World実装とシステム連携の仕様不明確
+    - SystemManagerの実装不足
+    - システム間の依存関係とイベントフローの曖昧さ
+  - **システム基盤の実装**:
+    - World.ts - ECSワールドの完全な実装
+    - SystemManager.ts - システム登録・実行管理
+    - BaseSystem抽象クラスの改良
+    - システム優先度とライフサイクル管理
+  - **設計文書の更新**:
+    - docs/architecture/ecs/systems.md の具体化
+    - docs/architecture/ecs/world.md の作成
+    - docs/api/ecs-systems.md の完全な仕様記述
+  - **システム基盤のテスト実装**:
+    - World機能の単体テスト（エンティティ・コンポーネント管理）
+    - SystemManager機能の単体テスト（システム登録・実行）
+    - システム間連携の統合テスト
+  - **動作確認**: World実装でエンティティ・コンポーネント管理が正常に動作することを確認
+  - **動作確認**: SystemManagerでシステム登録・実行が適切に動作することを確認
+  - **動作確認**: システム優先度とライフサイクルが正しく管理されることを確認
+  - **動作確認**: `npm run test`でECSシステム基盤のテストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement ECS system foundation with tests）
+  - _要件: ECSシステム基盤の確立_
+
+- [ ] 3.4 AnimationSystem設計の見直しと実装
+  - **現状分析**: 既存のAnimationSystem実装と設計文書の整合性確認
+  - **設計課題の特定**:
+    - AnimationComponentとの連携仕様の不明確
+    - CSS transitionとECSシステムの統合方法の曖昧さ
+    - アニメーション状態管理とライフサイクルの仕様不足
+    - イベント発火タイミングとフローの未定義
+  - **詳細仕様の策定**:
+    - AnimationSystemの具体的な動作仕様（更新頻度、処理順序）
+    - CSS transitionとの連携パターンとベストプラクティス
+    - アニメーション完了検知とイベント発火の仕組み
+    - パフォーマンス最適化戦略（大量エンティティ対応）
+  - **AnimationSystem実装**:
+    - BaseSystemを継承したAnimationSystemクラス
+    - アニメーション状態管理とCSS連携機能
+    - イベント発火とコールバック処理
+    - パフォーマンス監視と最適化機能
+  - **設計文書の更新**:
+    - docs/architecture/ecs/systems.md のAnimationSystem仕様追加
+    - docs/api/ecs-systems.md のAnimationSystem API記述
+  - **テスト実装**:
+    - AnimationSystemの単体テスト（システム実行、CSS連携、イベント処理）
+    - パフォーマンステスト（大量アニメーション処理）
   - **動作確認**: AnimationSystemがECSシステムとして正常に登録・実行されることを確認
   - **動作確認**: CSS transitionとの連携が適切に動作することを確認
   - **動作確認**: アニメーション完了イベントが正しく発火されることを確認
   - **動作確認**: `npm run test`でAnimationSystemのテストが全て通ることを確認
   - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement AnimationSystem for ECS with tests）
-  - _要件: 3.3_
+  - Gitコミットとプッシュ（feat: implement AnimationSystem with refined design）
+  - _要件: 3.3, アニメーション機能の完全実装_
+
+- [ ] 3.5 PhyllotaxisSystem設計の見直しと実装
+  - **現状分析**: 既存のPhyllotaxisSystem実装と設計文書の整合性確認
+  - **設計課題の特定**:
+    - フィロタキシス計算とECSシステムの統合方法の曖昧さ
+    - エンティティ位置更新のタイミングと頻度の仕様不足
+    - 重複回避ロジックとインデックス管理の仕様不明確
+    - イベント発火とシステム間連携の未定義
+  - **詳細仕様の策定**:
+    - PhyllotaxisSystemの具体的な動作仕様（トリガー、処理順序、更新頻度）
+    - フィロタキシス計算ユーティリティとの連携パターン
+    - エンティティインデックス管理と重複回避の仕組み
+    - 位置更新イベントとアニメーション連携の仕様
+  - **PhyllotaxisSystem実装**:
+    - BaseSystemを継承したPhyllotaxisSystemクラス
+    - エンティティ位置計算とフィロタキシス配置機能
+    - インデックス管理と重複回避ロジック
+    - イベント発火とシステム間連携機能
+  - **設計文書の更新**:
+    - docs/architecture/ecs/systems.md のPhyllotaxisSystem仕様追加
+    - docs/api/ecs-systems.md のPhyllotaxisSystem API記述
+  - **テスト実装**:
+    - PhyllotaxisSystemの単体テスト（システム実行、位置計算、イベント発火）
+    - フィロタキシス配置の正確性テスト（数学的検証）
+  - **動作確認**: PhyllotaxisSystemがECSシステムとして正常に登録・実行されることを確認
+  - **動作確認**: エンティティの位置計算が正確に行われることを確認
+  - **動作確認**: 重複回避ロジックが適切に動作することを確認
+  - **動作確認**: `npm run test`でPhyllotaxisSystemのテストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement PhyllotaxisSystem with refined design）
+  - _要件: 3.3, フィロタキシス配置機能の完全実装_
+
+- [ ] 3.6 ECS全体の整合性チェックと統合改善
+  - **全体統合分析**: ECS実装全体（コンポーネント、エンティティ、システム）の整合性確認
+  - **設計整合性の検証**:
+    - コンポーネント間の依存関係と型整合性の確認
+    - エンティティ管理システムとコンポーネントの連携検証
+    - システム間のデータフローとイベント連携の整合性チェック
+    - 設計文書と実装の最終的な一致確認
+  - **パフォーマンス分析と最適化**:
+    - エンティティ作成・削除のパフォーマンス測定
+    - システム実行順序と処理効率の検証
+    - メモリ使用量とガベージコレクション影響の分析
+    - 大量エンティティ（50個）での動作確認
+  - **統合テストの実装**:
+    - ECS全体の統合テストスイート作成
+    - エンティティライフサイクル全体のテスト
+    - システム間連携の統合テスト
+    - エラーハンドリングとエッジケースのテスト
+  - **コードレビューと改善**:
+    - 全ECSファイルのコードレビュー実施
+    - TypeScript型安全性の最終確認
+    - コーディング規約準拠の確認
+    - パフォーマンス改善点の特定と実装
+  - **設計文書の最終更新**:
+    - docs/architecture/ecs/ 全文書の最終レビューと更新
+    - docs/api/ecs-\*.md の実装反映と完成
+    - 実装ガイドラインとベストプラクティスの追加
+    - トラブルシューティングガイドの作成
+  - **品質保証**:
+    - 全ECSテストの実行と品質確認
+    - テストカバレッジの測定と改善
+    - 静的解析ツールによるコード品質チェック
+    - パフォーマンスベンチマークの実施
+  - **動作確認**: ECS全体が設計通りに統合され、正常に動作することを確認
+  - **動作確認**: 全てのエンティティ操作（作成、更新、削除、クエリ）が期待通りに動作することを確認
+  - **動作確認**: システム間の連携とイベントフローが適切に機能することを確認
+  - **動作確認**: `npm run test`でECS全体のテストが全て通り、カバレッジが十分であることを確認
+  - **動作確認**: パフォーマンステストで許容範囲内の結果が得られることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: complete ECS integration with comprehensive testing）
+  - _要件: ECS全体の完成と品質保証_
 
 ## 4. 基本UIコンポーネントの実装
 

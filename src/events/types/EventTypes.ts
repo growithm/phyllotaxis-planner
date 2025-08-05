@@ -30,3 +30,19 @@ export enum UIEvents {
   MODAL_OPENED = 'ui:modal:opened',
   MODAL_CLOSED = 'ui:modal:closed',
 }
+
+/**
+ * エンティティライフサイクル関連のイベント定義
+ */
+export enum LifecycleEvents {
+  BEFORE_CREATE = 'entity:beforeCreate',
+  AFTER_CREATE = 'entity:afterCreate',
+  BEFORE_UPDATE = 'entity:beforeUpdate',
+  AFTER_UPDATE = 'entity:afterUpdate',
+  BEFORE_DESTROY = 'entity:beforeDestroy',
+  AFTER_DESTROY = 'entity:afterDestroy',
+  COMPONENT_ADDED = 'entity:componentAdded',
+  COMPONENT_REMOVED = 'entity:componentRemoved',
+  VALIDATION_FAILED = 'entity:validationFailed',
+  STATE_CHANGED = 'entity:stateChanged',
+}

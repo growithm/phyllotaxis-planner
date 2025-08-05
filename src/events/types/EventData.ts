@@ -1,5 +1,7 @@
 import type { Position, AnimationType, EasingType } from '@/types';
-import { IdeaEvents, SystemEvents, UIEvents } from './EventTypes';
+import type { EntityId } from '@/ecs/core/Entity';
+import type { EntityType } from '@/ecs/entities/EntityTypes';
+import { IdeaEvents, SystemEvents, UIEvents, LifecycleEvents } from './EventTypes';
 
 /**
  * アイデア追加イベントのデータ
@@ -119,6 +121,43 @@ export interface ModalEvent {
 }
 
 /**
+ * ライフサイクルイベントデータ
+ */
+export interface LifecycleEventData {
+  entityId: EntityId;
+  entityType?: EntityType;
+  timestamp: number;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * コンポーネント変更イベントデータ
+ */
+export interface ComponentChangeEventData extends LifecycleEventData {
+  componentType: string;
+  oldValue?: any;
+  newValue?: any;
+}
+
+/**
+ * 検証失敗イベントデータ
+ */
+export interface ValidationFailedEventData extends LifecycleEventData {
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * 状態変更イベントデータ
+ */
+export interface StateChangeEventData extends LifecycleEventData {
+  property: string;
+  oldValue: any;
+  newValue: any;
+  componentType: string;
+}
+
+/**
  * 型安全なイベントマップ
  * 各イベントタイプに対応するデータ型を定義
  */
@@ -143,4 +182,16 @@ export interface EventMap {
   [UIEvents.INPUT_CHANGED]: InputChangedEvent;
   [UIEvents.MODAL_OPENED]: ModalEvent;
   [UIEvents.MODAL_CLOSED]: ModalEvent;
+  
+  // ライフサイクル関連イベント
+  [LifecycleEvents.BEFORE_CREATE]: LifecycleEventData;
+  [LifecycleEvents.AFTER_CREATE]: LifecycleEventData;
+  [LifecycleEvents.BEFORE_UPDATE]: LifecycleEventData;
+  [LifecycleEvents.AFTER_UPDATE]: LifecycleEventData;
+  [LifecycleEvents.BEFORE_DESTROY]: LifecycleEventData;
+  [LifecycleEvents.AFTER_DESTROY]: LifecycleEventData;
+  [LifecycleEvents.COMPONENT_ADDED]: ComponentChangeEventData;
+  [LifecycleEvents.COMPONENT_REMOVED]: ComponentChangeEventData;
+  [LifecycleEvents.VALIDATION_FAILED]: ValidationFailedEventData;
+  [LifecycleEvents.STATE_CHANGED]: StateChangeEventData;
 }

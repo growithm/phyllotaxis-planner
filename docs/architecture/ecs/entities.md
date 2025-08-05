@@ -2,57 +2,66 @@
 title: "ECSエンティティ設計"
 type: architecture
 category: ecs
-tags: [architecture, ecs, entities, identity, management]
+tags: [architecture, ecs, entities, factory, types, management]
 related:
-  - "[[overview]]"
   - "[[components]]"
   - "[[systems]]"
-  - "[[integration]]"
+  - "[[overview]]"
+  - "[[../../api/ecs-components]]"
 created: 2025-02-08
+updated: 2025-02-08
 ---
 
 # ECSエンティティ設計
 
 > [!info] 概要
-> Entity Component System (ECS) におけるエンティティの設計と管理方法を詳細に説明します。
+> Phyllotaxis PlannerのECSアーキテクチャにおけるエンティティ設計、タイプ管理、ファクトリパターン、クエリシステムの詳細を説明します。MVPに必要な機能に焦点を当てたシンプルで実用的な設計です。
 
-## エンティティ設計原則
+## 設計原則
 
-### 🎯 基本概念
+### 🎯 エンティティの基本概念
 
-> [!warning] 純粋なECS原則
-> エンティティは単純な識別子のみ。データもロジックも一切持たない。
+> [!note] エンティティはIDのみ
+> エンティティ自体はユニークなIDのみを持ち、データはコンポーネントに格納される
 
 ```typescript
-// ✅ 正しいエンティティ設計
+// エンティティはIDのみ
 type EntityId = string;
 
-// エンティティは単純な文字列ID
-const ideaEntity: EntityId = "idea_1";
-const themeEntity: EntityId = "theme_center";
+// データはコンポーネントに格納
+const entity = world.createEntity(); // IDのみ返される
+world.addComponent(entity, createIdeaTextComponent('アイデア'));
+world.addComponent(entity, createPositionComponent(100, 200));
+```
 
-// ❌ 間違ったエンティティ設計
-class BadEntity {
-  id: string;
-  position: Position; // データを持ってはいけない
-  update(): void;     // ロジックを持ってはいけない
+### 🏷️ エンティティタイプシステム
+
+```typescript
+// エンティティタイプの定義
+export type EntityType = 'idea' | 'theme';
+
+// TextComponentのentityTypeプロパティで識別
+interface ITextComponent extends IComponent {
+  entityType: 'idea' | 'theme'; // 重要：エンティティタイプ識別子
+  content: string;
+  fontSize: number;
+  color: string;
 }
 ```
 
-### 🏗️ エンティティアーキテクチャ
-
 ```mermaid
 graph TB
-    subgraph "Entity Layer"
-        E1[EntityId: "idea_1"]
-        E2[EntityId: "idea_2"]
-        E3[EntityId: "theme_center"]
+    subgraph "Entity System Architecture"
+        E1[Entity ID: entity_1]
+        E2[Entity ID: entity_2]
+        E3[Entity ID: entity_3]
     end
     
     subgraph "Component Storage"
         PC[Position Components]
         TC[Text Components]
         VC[Visual Components]
+        AC[Animation Components]
     end
     
     subgraph "World Management"
@@ -69,6 +78,7 @@ graph TB
     CM --> PC
     CM --> TC
     CM --> VC
+    CM --> AC
     
     SM --> EM
     SM --> CM
@@ -79,43 +89,41 @@ graph TB
 ### 🏊 EntityPool
 
 > [!note] 責務
-> エンティティIDの効率的な生成と再利用
+> エンティティIDの効率的な生成と再利用（実装済み）
 
 ```typescript
-// ecs/core/EntityPool.ts
-class EntityPool {
+// src/ecs/core/Entity.ts
+export class EntityPool {
   private availableIds: EntityId[] = [];
   private nextId: number = 1;
   private activeEntities: Set<EntityId> = new Set();
-  
+
   acquire(): EntityId {
     let id: EntityId;
-    
     if (this.availableIds.length > 0) {
       id = this.availableIds.pop()!;
     } else {
       id = `entity_${this.nextId++}`;
     }
-    
     this.activeEntities.add(id);
     return id;
   }
-  
+
   release(id: EntityId): void {
     if (this.activeEntities.has(id)) {
       this.activeEntities.delete(id);
       this.availableIds.push(id);
     }
   }
-  
+
   isActive(id: EntityId): boolean {
     return this.activeEntities.has(id);
   }
-  
+
   getActiveEntities(): EntityId[] {
     return Array.from(this.activeEntities);
   }
-  
+
   getStats(): EntityPoolStats {
     return {
       active: this.activeEntities.size,
@@ -124,166 +132,277 @@ class EntityPool {
     };
   }
 }
-
-interface EntityPoolStats {
-  active: number;
-  available: number;
-  total: number;
-}
 ```
 
 ### 🏭 EntityFactory
 
 > [!note] 責務
-> エンティティとコンポーネントの組み合わせパターンを定義
+> エンティティタイプに応じた適切なコンポーネント構成でエンティティを作成
 
 ```typescript
-// ecs/core/EntityFactory.ts
-interface EntityBlueprint {
-  readonly name: string;
-  readonly components: ComponentType[];
-  create(entityId: EntityId, world: World, ...args: any[]): void;
+// src/ecs/entities/EntityFactory.ts
+export interface CreateEntityOptions {
+  x?: number;
+  y?: number;
+  withAnimation?: boolean;
+  animationDuration?: number;
+  customTextOptions?: any;
+  customVisualOptions?: any;
+  customPositionOptions?: any;
 }
 
-class EntityFactory {
-  private blueprints: Map<string, EntityBlueprint> = new Map();
-  
-  registerBlueprint(blueprint: EntityBlueprint): void {
-    this.blueprints.set(blueprint.name, blueprint);
+export class EntityFactory {
+  private world: IWorld;
+  private typeManager: EntityTypeManager;
+
+  constructor(world: IWorld) {
+    this.world = world;
+    this.typeManager = new EntityTypeManager(world);
   }
-  
-  create(blueprintName: string, world: World, ...args: any[]): EntityId {
-    const blueprint = this.blueprints.get(blueprintName);
-    if (!blueprint) {
-      throw new Error(`Unknown blueprint: ${blueprintName}`);
+
+  // テーマエンティティを作成
+  createThemeEntity(content: string, options: CreateEntityOptions = {}): EntityId | null {
+    if (!this.typeManager.canCreateEntity('theme')) {
+      console.warn('Cannot create theme entity: maximum count reached');
+      return null;
     }
+
+    const entityId = this.world.createEntity();
     
-    const entityId = world.createEntity();
-    blueprint.create(entityId, world, ...args);
-    
+    // テキストコンポーネント
+    const textComponent = createThemeTextComponent(content, options.customTextOptions);
+    this.world.addComponent(entityId, textComponent);
+
+    // 視覚コンポーネント
+    const visualComponent = createThemeVisualComponent(options.customVisualOptions);
+    this.world.addComponent(entityId, visualComponent);
+
+    // 位置コンポーネント（中心位置）
+    const positionComponent = createPositionComponent(
+      options.x || 400, // デフォルト中心X
+      options.y || 300, // デフォルト中心Y
+      { index: -1, zIndex: 1000, ...options.customPositionOptions }
+    );
+    this.world.addComponent(entityId, positionComponent);
+
     return entityId;
   }
-  
-  getBlueprint(name: string): EntityBlueprint | undefined {
-    return this.blueprints.get(name);
-  }
-  
-  listBlueprints(): string[] {
-    return Array.from(this.blueprints.keys());
+
+  // アイデアエンティティを作成
+  createIdeaEntity(content: string, options: CreateEntityOptions = {}): EntityId | null {
+    if (!this.typeManager.canCreateEntity('idea')) {
+      console.warn('Cannot create idea entity: maximum count reached');
+      return null;
+    }
+
+    const entityId = this.world.createEntity();
+    const index = getNextAvailableIndex(this.world);
+
+    // テキストコンポーネント
+    const textComponent = createIdeaTextComponent(content, options.customTextOptions);
+    this.world.addComponent(entityId, textComponent);
+
+    // 視覚コンポーネント
+    const visualComponent = createIdeaVisualComponent(options.customVisualOptions);
+    this.world.addComponent(entityId, visualComponent);
+
+    // 位置コンポーネント
+    const positionComponent = options.x !== undefined && options.y !== undefined
+      ? createPositionComponent(options.x, options.y, { index, zIndex: index })
+      : createPhyllotaxisPositionComponent(index, 0, 0, 400, 300);
+    this.world.addComponent(entityId, positionComponent);
+
+    // アニメーションコンポーネント
+    const animationComponent = createAnimationComponent(
+      'fadeIn',
+      options.animationDuration || 500,
+      { isAnimating: options.withAnimation || false }
+    );
+    this.world.addComponent(entityId, animationComponent);
+
+    return entityId;
   }
 }
 ```
 
-## エンティティブループリント
-
-### 💡 IdeaBlueprint
+### 🏷️ EntityTypeManager
 
 > [!note] 責務
-> アイデアノードエンティティの構成定義
+> エンティティタイプの識別と制限管理
 
 ```typescript
-// ecs/blueprints/IdeaBlueprint.ts
-export const IdeaBlueprint: EntityBlueprint = {
-  name: 'idea',
-  components: [
-    ComponentTypes.POSITION,
-    ComponentTypes.TEXT,
-    ComponentTypes.VISUAL,
-    ComponentTypes.ANIMATION,
-    ComponentTypes.INTERACTION
-  ],
-  
-  create(entityId: EntityId, world: World, text: string, position?: { x: number; y: number }): void {
-    // テキストコンポーネント
-    world.addComponent(entityId, createTextComponent(text, {
-      fontSize: 14,
-      color: '#1F2937',
-      maxLength: 100,
-      isEditable: false
-    }));
-    
-    // 位置コンポーネント
-    world.addComponent(entityId, createPositionComponent(
-      position?.x || 0, 
-      position?.y || 0,
-      0, // angle
-      0, // radius (PhyllotaxisSystemが計算)
-      1, // scale
-      1  // zIndex
-    ));
-    
-    // 視覚コンポーネント
-    world.addComponent(entityId, createVisualComponent('leaf', '#10B981', '#059669', {
-      opacity: 0.9,
-      cssClasses: ['idea-leaf', 'hover-effect']
-    }));
-    
-    // アニメーションコンポーネント
-    world.addComponent(entityId, createAnimationComponent('fadeIn', 600, 'ease-out'));
-    
-    // インタラクションコンポーネント
-    world.addComponent(entityId, createInteractionComponent({
-      clickable: true,
-      hoverable: true,
-      selectable: true,
-      ariaLabel: `アイデア: ${text}`
-    }));
-  }
+// src/ecs/entities/EntityTypes.ts
+export type EntityType = 'idea' | 'theme';
+
+export const ENTITY_TYPE_CONFIG: Record<EntityType, EntityTypeInfo> = {
+  theme: {
+    type: 'theme',
+    displayName: '中心テーマ',
+    description: 'マップの中心となる主要テーマ',
+    maxCount: 1, // テーマは1つのみ
+    requiredComponents: ['position', 'text', 'visual'],
+    optionalComponents: ['animation'],
+  },
+  idea: {
+    type: 'idea',
+    displayName: 'アイデア',
+    description: 'テーマから派生するアイデア要素',
+    maxCount: 50, // MVP制限
+    requiredComponents: ['position', 'text', 'visual'],
+    optionalComponents: ['animation'],
+  },
 };
+
+export class EntityTypeManager {
+  private world: IWorld;
+  private typeCache: Map<EntityId, EntityType | undefined> = new Map();
+
+  constructor(world: IWorld) {
+    this.world = world;
+  }
+
+  // エンティティのタイプを取得（キャッシュ付き）
+  getEntityType(entityId: EntityId): EntityType | undefined {
+    const textComponent = getTextComponent(this.world, entityId);
+    return textComponent?.entityType;
+  }
+
+  // 指定されたタイプのエンティティを新規作成可能かチェック
+  canCreateEntity(type: EntityType): boolean {
+    const config = ENTITY_TYPE_CONFIG[type];
+    const currentCount = this.getEntityCount(type);
+    return config.maxCount === -1 || currentCount < config.maxCount;
+  }
+
+  // 指定されたタイプのエンティティ数を取得
+  getEntityCount(type: EntityType): number {
+    return this.world.getAllEntities().filter(entityId => {
+      const entityType = this.getEntityType(entityId);
+      return entityType === type;
+    }).length;
+  }
+}
 ```
 
-### 🎯 ThemeBlueprint
+## エンティティ管理とクエリ
+
+### 🔍 EntityManager
 
 > [!note] 責務
-> 中心テーマエンティティの構成定義
+> エンティティのライフサイクル管理とクエリ機能を提供
 
 ```typescript
-// ecs/blueprints/ThemeBlueprint.ts
-export const ThemeBlueprint: EntityBlueprint = {
-  name: 'theme',
-  components: [
-    ComponentTypes.POSITION,
-    ComponentTypes.TEXT,
-    ComponentTypes.VISUAL,
-    ComponentTypes.INTERACTION
-  ],
-  
-  create(entityId: EntityId, world: World, theme: string): void {
-    // テキストコンポーネント（大きなフォント）
-    world.addComponent(entityId, createTextComponent(theme, {
-      fontSize: 18,
-      fontFamily: 'Inter, sans-serif',
-      color: '#111827',
-      alignment: 'center',
-      isEditable: true,
-      maxLength: 50
-    }));
-    
-    // 位置コンポーネント（中心固定）
-    world.addComponent(entityId, createPositionComponent(
-      0,   // x (中心)
-      0,   // y (中心)
-      0,   // angle
-      0,   // radius
-      1.5, // scale (大きく表示)
-      10   // zIndex (最前面)
-    ));
-    
-    // 視覚コンポーネント（円形）
-    world.addComponent(entityId, createVisualComponent('circle', '#F9FAFB', '#E5E7EB', {
-      strokeWidth: 3,
-      cssClasses: ['center-theme', 'editable']
-    }));
-    
-    // インタラクションコンポーネント
-    world.addComponent(entityId, createInteractionComponent({
-      clickable: true,
-      hoverable: true,
-      draggable: false,
-      cursor: 'text',
-      ariaLabel: '中心テーマ'
-    }));
+// src/ecs/entities/EntityManager.ts
+export interface EntityQuery {
+  type?: EntityType;
+  hasComponents?: string[];
+  textContains?: string;
+  indexRange?: { min: number; max: number };
+  isAnimating?: boolean;
+  isVisible?: boolean;
+}
+
+export class EntityManager {
+  private world: IWorld;
+  private typeManager: EntityTypeManager;
+  private factory: EntityFactory;
+
+  constructor(world: IWorld) {
+    this.world = world;
+    this.typeManager = new EntityTypeManager(world);
+    this.factory = new EntityFactory(world);
   }
+
+  // エンティティクエリを実行
+  query(conditions: EntityQuery): EntityId[] {
+    let entities = this.world.getAllEntities();
+
+    // タイプフィルタ
+    if (conditions.type) {
+      entities = entities.filter(entityId => 
+        this.typeManager.getEntityType(entityId) === conditions.type
+      );
+    }
+
+    // 必要コンポーネントフィルタ
+    if (conditions.hasComponents) {
+      entities = entities.filter(entityId =>
+        conditions.hasComponents!.every(componentType =>
+          this.world.hasComponent(entityId, componentType as any)
+        )
+      );
+    }
+
+    // テキスト内容フィルタ
+    if (conditions.textContains) {
+      entities = entities.filter(entityId => {
+        const textComponent = getTextComponent(this.world, entityId);
+        return textComponent?.content.includes(conditions.textContains!) || false;
+      });
+    }
+
+    return entities;
+  }
+
+  // アイデアエンティティをインデックス順で取得
+  getIdeaEntitiesSorted(): EntityId[] {
+    return this.query({ type: 'idea' }).sort((a, b) => {
+      const posA = getPositionComponent(this.world, a);
+      const posB = getPositionComponent(this.world, b);
+      return (posA?.index || 0) - (posB?.index || 0);
+    });
+  }
+
+  // テーマエンティティを取得
+  getThemeEntity(): EntityId | undefined {
+    const themeEntities = this.query({ type: 'theme' });
+    return themeEntities[0];
+  }
+}
+```
+
+### 🔧 ヘルパー関数
+
+> [!note] 責務
+> エンティティとコンポーネントの操作を簡素化
+
+```typescript
+// src/ecs/components/helpers.ts
+// エンティティタイプ判定
+export const isThemeEntity = (world: IWorld, entityId: EntityId): boolean => {
+  const textComponent = getTextComponent(world, entityId);
+  return textComponent?.entityType === 'theme';
+};
+
+export const isIdeaEntity = (world: IWorld, entityId: EntityId): boolean => {
+  const textComponent = getTextComponent(world, entityId);
+  return textComponent?.entityType === 'idea';
+};
+
+// エンティティ取得
+export const getThemeEntity = (world: IWorld): EntityId | undefined => {
+  return world.getAllEntities()
+    .find(entityId => isThemeEntity(world, entityId));
+};
+
+export const getIdeaEntitiesSortedByIndex = (world: IWorld): EntityId[] => {
+  return world.getAllEntities()
+    .filter(entityId => isIdeaEntity(world, entityId))
+    .sort((a, b) => {
+      const posA = getPositionComponent(world, a);
+      const posB = getPositionComponent(world, b);
+      return (posA?.index || 0) - (posB?.index || 0);
+    });
+};
+
+// インデックス管理
+export const getNextAvailableIndex = (world: IWorld): number => {
+  const ideaEntities = getIdeaEntitiesSortedByIndex(world);
+  if (ideaEntities.length === 0) return 0;
+  
+  const lastEntity = ideaEntities[ideaEntities.length - 1];
+  const lastPosition = getPositionComponent(world, lastEntity);
+  return (lastPosition?.index || 0) + 1;
 };
 ```
 
