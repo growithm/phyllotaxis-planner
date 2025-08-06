@@ -18,6 +18,8 @@ export enum SystemEvents {
   RENDER_REQUESTED = 'render:requested',
   ERROR_OCCURRED = 'error:occurred',
   SYSTEM_READY = 'system:ready',
+  SYSTEM_PROCESSED = 'system:processed',
+  BATCH_UPDATE_COMPLETED = 'batch:update:completed',
 }
 
 /**

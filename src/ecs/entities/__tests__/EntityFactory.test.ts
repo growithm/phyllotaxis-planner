@@ -11,13 +11,15 @@ import {
   getPositionComponent, 
   getAnimationComponent 
 } from '@/ecs/components/helpers';
+import { EventBusImpl } from '@/events/core/EventBusImpl';
 
 describe('EntityFactory', () => {
   let world: World;
   let factory: EntityFactory;
 
   beforeEach(() => {
-    world = new World();
+    const eventBus = new EventBusImpl();
+    world = new World(eventBus);
     factory = new EntityFactory(world);
   });
 

@@ -1,17 +1,37 @@
+import type { EventMap } from '@/events/types/EventData';
+
 /**
  * EventBus インターフェース
  * イベント駆動アーキテクチャの中核となるイベントバスの定義
  */
 export interface EventBus {
   /**
-   * イベントを発行する
+   * 型安全なイベント発行
+   * @param event - イベントキー
+   * @param data - イベントデータ
+   */
+  emit<K extends keyof EventMap>(event: K, data: EventMap[K]): void;
+
+  /**
+   * 従来の型なしイベント発行（後方互換性のため）
    * @param event - イベント名
    * @param data - イベントデータ
    */
   emit<T>(event: string, data: T): void;
 
   /**
-   * イベントリスナーを登録する
+   * 型安全なイベントリスナー登録
+   * @param event - イベントキー
+   * @param handler - イベントハンドラー
+   * @returns アンサブスクライブ関数
+   */
+  on<K extends keyof EventMap>(
+    event: K,
+    handler: (data: EventMap[K]) => void
+  ): () => void;
+
+  /**
+   * 従来の型なしイベントリスナー登録（後方互換性のため）
    * @param event - イベント名
    * @param handler - イベントハンドラー
    * @returns アンサブスクライブ関数
@@ -26,7 +46,17 @@ export interface EventBus {
   off(event: string, handler: Function): void;
 
   /**
-   * 一度だけ実行されるイベントリスナーを登録する
+   * 型安全な一度だけ実行されるイベントリスナー登録
+   * @param event - イベントキー
+   * @param handler - イベントハンドラー
+   */
+  once<K extends keyof EventMap>(
+    event: K,
+    handler: (data: EventMap[K]) => void
+  ): void;
+
+  /**
+   * 従来の型なし一度だけ実行されるイベントリスナー登録（後方互換性のため）
    * @param event - イベント名
    * @param handler - イベントハンドラー
    */

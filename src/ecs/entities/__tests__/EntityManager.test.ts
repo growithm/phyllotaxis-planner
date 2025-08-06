@@ -14,13 +14,15 @@ import {
   createAnimationComponent
 } from '@/ecs/components';
 import { getPositionComponent } from '@/ecs/components/helpers';
+import { EventBusImpl } from '@/events/core/EventBusImpl';
 
 describe('EntityManager', () => {
   let world: World;
   let entityManager: EntityManager;
 
   beforeEach(() => {
-    world = new World();
+    const eventBus = new EventBusImpl();
+    world = new World(eventBus);
     entityManager = new EntityManager(world);
   });
 

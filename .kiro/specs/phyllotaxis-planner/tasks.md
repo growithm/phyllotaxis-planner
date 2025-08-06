@@ -210,7 +210,7 @@
   - Gitコミットとプッシュ（docs: refine ECS system design and architecture）
   - _要件: ECSシステム設計の確立_
 
-- [ ] 3.3.1 ECSコア基盤の設計実装
+- [x] 3.3.1 ECSコア基盤の設計実装
   - **事前確認**: 更新されたECS設計文書（docs/architecture/ecs/systems.md, world.md）を確認
   - **System.ts の設計実装**:
     - ISystemインターフェースの実装（設計文書準拠）

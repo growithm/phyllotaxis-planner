@@ -45,7 +45,6 @@ export abstract class BaseSystem implements ISystem {
   abstract readonly requiredComponents: ComponentType[];
   readonly priority: number;
   protected eventBus?: EventBus;
-
   constructor(priority: number = 0, eventBus?: EventBus) {
     this.priority = priority;
     this.eventBus = eventBus;
@@ -102,7 +101,19 @@ export abstract class BaseSystem implements ISystem {
   /**
    * 型安全なシステムイベント発火
    */
-  protected emitSystemEvent<T>(event: string, data: T): void {
+  protected emitSystemEvent<K extends keyof import('@/events/types/EventData').EventMap>(
+    event: K, 
+    data: import('@/events/types/EventData').EventMap[K]
+  ): void {
+    if (this.eventBus) {
+      this.eventBus.emit(event, data);
+    }
+  }
+
+  /**
+   * 従来の型なしイベント発火（後方互換性のため）
+   */
+  protected emitEvent<T>(event: string, data: T): void {
     if (this.eventBus) {
       this.eventBus.emit(event, data);
     }

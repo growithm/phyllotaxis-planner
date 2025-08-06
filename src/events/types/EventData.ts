@@ -86,6 +86,26 @@ export interface ErrorEvent {
 }
 
 /**
+ * システム処理完了イベントのデータ
+ */
+export interface SystemProcessedEvent {
+  systemName: string;
+  processedEntities: number;
+  executionTime: number;
+  timestamp: Date;
+}
+
+/**
+ * バッチ更新完了イベントのデータ
+ */
+export interface BatchUpdateCompletedEvent {
+  oldVersion: number;
+  newVersion: number;
+  affectedEntities: number;
+  timestamp: Date;
+}
+
+/**
  * フォーム送信イベントのデータ
  */
 export interface FormSubmittedEvent {
@@ -175,6 +195,8 @@ export interface EventMap {
   [SystemEvents.RENDER_REQUESTED]: RenderRequestedEvent;
   [SystemEvents.ERROR_OCCURRED]: ErrorEvent;
   [SystemEvents.SYSTEM_READY]: Record<string, never>; // 空のオブジェクト
+  [SystemEvents.SYSTEM_PROCESSED]: SystemProcessedEvent;
+  [SystemEvents.BATCH_UPDATE_COMPLETED]: BatchUpdateCompletedEvent;
   
   // UI関連イベント
   [UIEvents.FORM_SUBMITTED]: FormSubmittedEvent;
@@ -195,3 +217,4 @@ export interface EventMap {
   [LifecycleEvents.VALIDATION_FAILED]: ValidationFailedEventData;
   [LifecycleEvents.STATE_CHANGED]: StateChangeEventData;
 }
+

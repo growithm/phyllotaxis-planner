@@ -3,6 +3,7 @@ import { World } from '@/ecs/core/World';
 import { ComponentTypes, IComponent } from '@/ecs/core/Component';
 import { BaseSystem, IWorld } from '@/ecs/core/System';
 import { EntityId } from '@/ecs/core/Entity';
+import { EventBusImpl } from '@/events/core/EventBusImpl';
 
 // テスト用コンポーネント
 interface TestPositionComponent extends IComponent {
@@ -66,12 +67,11 @@ class TestPhyllotaxisSystem extends BaseSystem {
     super(1); // 高優先度
   }
 
-  update(entities: EntityId[], world: IWorld, _deltaTime: number): void {
-    const processableEntities = this.filterEntities(entities, world);
-    this.processedEntities = [...processableEntities];
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
+    this.processedEntities = [...entities];
 
     // フィロタキシス配置計算のシミュレーション
-    processableEntities.forEach((entityId, index) => {
+    entities.forEach((entityId, index) => {
       const position = world.getComponent<TestPositionComponent>(entityId, ComponentTypes.POSITION);
       if (position) {
         // 簡単な螺旋配置計算
@@ -97,11 +97,10 @@ class TestAnimationSystem extends BaseSystem {
     super(2); // 中優先度
   }
 
-  update(entities: EntityId[], world: IWorld, deltaTime: number): void {
-    const processableEntities = this.filterEntities(entities, world);
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
     this.animatedEntities = [];
 
-    processableEntities.forEach(entityId => {
+    entities.forEach(entityId => {
       const animation = world.getComponent<TestAnimationComponent>(entityId, ComponentTypes.ANIMATION);
       if (animation && animation.isAnimating) {
         animation.progress = Math.min(animation.progress + deltaTime / animation.duration, 1);
@@ -121,7 +120,8 @@ describe('ECS Integration Tests', () => {
   let animationSystem: TestAnimationSystem;
 
   beforeEach(() => {
-    world = new World();
+    const eventBus = new EventBusImpl();
+    world = new World(eventBus);
     phyllotaxisSystem = new TestPhyllotaxisSystem();
     animationSystem = new TestAnimationSystem();
     
@@ -201,12 +201,13 @@ describe('ECS Integration Tests', () => {
         readonly name = this.systemName;
         readonly requiredComponents = [ComponentTypes.POSITION];
 
-        update(_entities: EntityId[], _world: IWorld, _deltaTime: number): void {
+        protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
           executionOrder.push(this.systemName);
         }
       }
 
-      const world2 = new World();
+      const eventBus2 = new EventBusImpl();
+      const world2 = new World(eventBus2);
       const lowPrioritySystem = new OrderTrackingSystem('LowPriority', 3);
       const highPrioritySystem = new OrderTrackingSystem('HighPriority', 1);
       const mediumPrioritySystem = new OrderTrackingSystem('MediumPriority', 2);

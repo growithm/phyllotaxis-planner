@@ -7,8 +7,9 @@ import { ComponentType, ComponentTypes, IComponent } from '@/ecs/core/Component'
 import { ISystem, IWorld, SystemStats } from '@/ecs/core/System';
 import { ComponentManager, ComponentStats } from '@/ecs/core/ComponentManager';
 import { SystemManager } from '@/ecs/core/SystemManager';
+import { LifecycleManager } from '@/ecs/core/LifecycleManager';
 import { EventBus } from '@/events/core/EventBus';
-import { SystemEvents, LifecycleEvents } from '@/events/types/EventTypes';
+import { SystemEvents, LifecycleEvents, IdeaEvents, UIEvents } from '@/events/types/EventTypes';
 
 /**
  * エンティティ統計情報
@@ -47,6 +48,7 @@ export class World implements IWorld {
 
   // イベント統合
   private eventBus: EventBus;
+  private lifecycleManager: LifecycleManager;
 
   // バージョン管理（キャッシュ無効化用）
   private version: number = 0;
@@ -58,6 +60,11 @@ export class World implements IWorld {
     this.componentManager = new ComponentManager();
     this.systemManager = new SystemManager(eventBus);
     this.eventBus = eventBus;
+    this.lifecycleManager = new LifecycleManager(eventBus, {
+      enableValidation: true,
+      enableStateTracking: true,
+      enablePerformanceMonitoring: process.env.NODE_ENV === 'development'
+    });
 
     this.initializeComponentStorage();
     this.setupEventListeners();
@@ -67,8 +74,196 @@ export class World implements IWorld {
    * イベントリスナーをセットアップ
    */
   private setupEventListeners(): void {
-    // 将来的にアイデア追加・削除イベントなどを処理
-    // 現在は基盤のみ実装
+    this.setupSystemEventListeners();
+    this.setupIdeaEventListeners();
+    this.setupThemeEventListeners();
+  }
+
+  /**
+   * システム間イベント連携のセットアップ
+   */
+  private setupSystemEventListeners(): void {
+    // システム処理完了イベントの監視
+    this.eventBus.on(SystemEvents.SYSTEM_READY, (data) => {
+      // システム処理統計の更新
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[World] System ${data.systemName} processed ${data.processedEntities} entities`);
+      }
+    });
+
+    // システムエラーイベントの監視
+    this.eventBus.on(SystemEvents.ERROR_OCCURRED, (data) => {
+      console.error(`[World] System error from ${data.source}:`, data.message);
+      
+      // 重要なエラーの場合は追加処理
+      if (!data.recoverable) {
+        this.handleCriticalSystemError(data);
+      }
+    });
+
+    // 位置計算完了 → アニメーション開始の連携
+    this.eventBus.on(SystemEvents.POSITION_CALCULATED, (data) => {
+      // アニメーション開始イベントを発火
+      this.eventBus.emit(SystemEvents.ANIMATION_START, {
+        entityId: data.entityId,
+        animationType: 'fadeIn',
+        duration: 600,
+        easing: 'ease-out'
+      });
+    });
+
+    // アニメーション開始 → 描画要求の連携
+    this.eventBus.on(SystemEvents.ANIMATION_START, (data) => {
+      // 描画要求イベントを発火
+      this.eventBus.emit(SystemEvents.RENDER_REQUESTED, {
+        entityId: data.entityId,
+        priority: 'high',
+        timestamp: new Date()
+      });
+    });
+  }
+
+  /**
+   * アイデア関連イベントのセットアップ
+   */
+  private setupIdeaEventListeners(): void {
+    // アイデア追加イベント
+    this.eventBus.on(IdeaEvents.IDEA_ADDED, (data) => {
+      this.handleIdeaAdded(data);
+    });
+
+    // アイデア削除イベント
+    this.eventBus.on(IdeaEvents.IDEA_REMOVED, (data) => {
+      this.handleIdeaRemoved(data);
+    });
+
+    // アイデア更新イベント
+    this.eventBus.on(IdeaEvents.IDEA_UPDATED, (data) => {
+      this.handleIdeaUpdated(data);
+    });
+  }
+
+  /**
+   * テーマ関連イベントのセットアップ
+   */
+  private setupThemeEventListeners(): void {
+    // テーマ変更イベント
+    this.eventBus.on(IdeaEvents.THEME_CHANGED, (data) => {
+      this.handleThemeChanged(data);
+    });
+  }
+
+  /**
+   * 重要なシステムエラーの処理
+   */
+  private handleCriticalSystemError(errorData: any): void {
+    // システム停止
+    this.stopSystems();
+    
+    // エラー状態の記録
+    console.error('[World] Critical system error detected, systems stopped', errorData);
+    
+    // 外部への通知（UI層など）
+    this.eventBus.emit(UIEvents.MODAL_OPENED, {
+      modalId: 'system-error',
+      timestamp: new Date()
+    });
+  }
+
+  /**
+   * アイデア追加の処理
+   */
+  private handleIdeaAdded(data: any): void {
+    try {
+      // エンティティを作成（将来的にEntityFactoryを使用）
+      const entityId = this.createEntity();
+      
+      // 基本コンポーネントを追加（将来的にブループリントを使用）
+      // 現在は基盤のみ実装
+      console.log(`[World] Idea added: ${data.text} (Entity: ${entityId})`);
+      
+    } catch (error) {
+      console.error('[World] Failed to handle idea addition:', error);
+      this.eventBus.emit(SystemEvents.ERROR_OCCURRED, {
+        source: 'World.handleIdeaAdded',
+        message: `Failed to add idea: ${error instanceof Error ? error.message : String(error)}`,
+        error: error instanceof Error ? error : undefined,
+        recoverable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * アイデア削除の処理
+   */
+  private handleIdeaRemoved(data: any): void {
+    try {
+      // エンティティを削除
+      const removed = this.destroyEntity(data.id);
+      
+      if (removed) {
+        console.log(`[World] Idea removed: ${data.id}`);
+      } else {
+        console.warn(`[World] Failed to remove idea: Entity ${data.id} not found`);
+      }
+      
+    } catch (error) {
+      console.error('[World] Failed to handle idea removal:', error);
+      this.eventBus.emit(SystemEvents.ERROR_OCCURRED, {
+        source: 'World.handleIdeaRemoved',
+        message: `Failed to remove idea: ${error instanceof Error ? error.message : String(error)}`,
+        error: error instanceof Error ? error : undefined,
+        recoverable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * アイデア更新の処理
+   */
+  private handleIdeaUpdated(data: any): void {
+    try {
+      // エンティティのテキストコンポーネントを更新（将来的に実装）
+      console.log(`[World] Idea updated: ${data.id} from "${data.oldText}" to "${data.newText}"`);
+      
+    } catch (error) {
+      console.error('[World] Failed to handle idea update:', error);
+      this.eventBus.emit(SystemEvents.ERROR_OCCURRED, {
+        source: 'World.handleIdeaUpdated',
+        message: `Failed to update idea: ${error instanceof Error ? error.message : String(error)}`,
+        error: error instanceof Error ? error : undefined,
+        recoverable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  /**
+   * テーマ変更の処理
+   */
+  private handleThemeChanged(data: any): void {
+    try {
+      // 中心テーマエンティティを更新（将来的に実装）
+      console.log(`[World] Theme changed from "${data.oldTheme}" to "${data.newTheme}"`);
+      
+      // 全体の再描画要求
+      this.eventBus.emit(SystemEvents.RENDER_REQUESTED, {
+        priority: 'normal',
+        timestamp: new Date()
+      });
+      
+    } catch (error) {
+      console.error('[World] Failed to handle theme change:', error);
+      this.eventBus.emit(SystemEvents.ERROR_OCCURRED, {
+        source: 'World.handleThemeChanged',
+        message: `Failed to change theme: ${error instanceof Error ? error.message : String(error)}`,
+        error: error instanceof Error ? error : undefined,
+        recoverable: true,
+        timestamp: new Date()
+      });
+    }
   }
 
   /**
@@ -165,6 +360,14 @@ export class World implements IWorld {
     entityComponents.add(component.type);
 
     this.incrementVersion();
+
+    // ライフサイクルイベント発火
+    this.eventBus.emit(LifecycleEvents.COMPONENT_ADDED, {
+      entityId,
+      timestamp: Date.now(),
+      componentType: component.type,
+      newValue: component
+    });
   }
 
   /**
@@ -186,6 +389,9 @@ export class World implements IWorld {
    * エンティティからコンポーネントを削除
    */
   removeComponent(entityId: EntityId, type: ComponentType): boolean {
+    // 削除前にコンポーネントの値を取得
+    const oldComponent = this.componentManager.getComponent(entityId, type);
+    
     const removed = this.componentManager.removeComponent(entityId, type);
     
     if (removed) {
@@ -196,6 +402,14 @@ export class World implements IWorld {
       }
       
       this.incrementVersion();
+
+      // ライフサイクルイベント発火
+      this.eventBus.emit(LifecycleEvents.COMPONENT_REMOVED, {
+        entityId,
+        timestamp: Date.now(),
+        componentType: type,
+        oldValue: oldComponent
+      });
     }
 
     return removed;
@@ -387,6 +601,14 @@ export class World implements IWorld {
     this.entityPool.clear();
     this.componentManager.clear();
     this.systemManager.clear();
+    this.lifecycleManager.cleanup();
     this.version = 0;
+  }
+
+  /**
+   * LifecycleManagerを取得（テスト用）
+   */
+  getLifecycleManager(): LifecycleManager {
+    return this.lifecycleManager;
   }
 }

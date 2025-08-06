@@ -13,7 +13,7 @@ class TestSystem extends BaseSystem {
   public lastEntities: EntityId[] = [];
   public lastDeltaTime = 0;
 
-  update(entities: EntityId[], _world: IWorld, deltaTime: number): void {
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
     this.updateCallCount++;
     this.lastEntities = [...entities];
     this.lastDeltaTime = deltaTime;
@@ -33,7 +33,7 @@ class HighPrioritySystem extends BaseSystem {
     super(-1); // 高優先度
   }
 
-  update(_entities: EntityId[], _world: IWorld, _deltaTime: number): void {
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
     this.executionOrder = ++globalExecutionCounter;
   }
 }
@@ -48,7 +48,7 @@ class LowPrioritySystem extends BaseSystem {
     super(1); // 低優先度
   }
 
-  update(_entities: EntityId[], _world: IWorld, _deltaTime: number): void {
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
     this.executionOrder = ++globalExecutionCounter;
   }
 }
@@ -200,7 +200,7 @@ describe('SystemManager', () => {
         
         public updateCallCount = 0;
 
-        update(_entities: EntityId[], _world: IWorld, _deltaTime: number): void {
+        protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
           this.updateCallCount++;
         }
       }

@@ -14,6 +14,7 @@ import {
   createPositionComponent,
   createThemeVisualComponent 
 } from '@/ecs/components';
+import { EventBusImpl } from '@/events/core/EventBusImpl';
 
 describe('ENTITY_TYPE_CONFIG', () => {
   it('should have correct configuration for theme entities', () => {
@@ -42,7 +43,8 @@ describe('EntityTypeManager', () => {
   let typeManager: EntityTypeManager;
 
   beforeEach(() => {
-    world = new World();
+    const eventBus = new EventBusImpl();
+    world = new World(eventBus);
     typeManager = new EntityTypeManager(world);
   });
 

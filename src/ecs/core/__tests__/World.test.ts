@@ -3,6 +3,7 @@ import { World } from '@/ecs/core/World';
 import { ComponentTypes, IComponent } from '@/ecs/core/Component';
 import { BaseSystem, IWorld } from '@/ecs/core/System';
 import { EntityId } from '@/ecs/core/Entity';
+import { EventBusImpl } from '@/events/core/EventBusImpl';
 
 // テスト用コンポーネント
 interface TestPositionComponent extends IComponent {
@@ -35,10 +36,9 @@ class TestSystem extends BaseSystem {
   public updateCallCount = 0;
   public lastEntities: EntityId[] = [];
 
-  update(entities: EntityId[], world: IWorld, _deltaTime: number): void {
-    const processableEntities = this.filterEntities(entities, world);
+  protected processEntities(entities: EntityId[], world: IWorld, deltaTime: number): void {
     this.updateCallCount++;
-    this.lastEntities = [...processableEntities];
+    this.lastEntities = [...entities];
   }
 }
 
@@ -46,7 +46,8 @@ describe('World', () => {
   let world: World;
 
   beforeEach(() => {
-    world = new World();
+    const eventBus = new EventBusImpl();
+    world = new World(eventBus);
   });
 
   describe('Entity Management', () => {
