@@ -240,7 +240,7 @@
   - Gitコミットとプッシュ（feat: implement ECS core foundation based on refined design）
   - _要件: 設計文書に基づくECSコア基盤の実装_
 
-- [ ] 3.3.2 イベント統合システムの実装
+- [x] 3.3.2 イベント統合システムの実装
   - **事前確認**: イベント統合設計文書（docs/architecture/ecs/systems.md）を確認
   - **LifecycleManager実装**:
     - エンティティライフサイクルイベント管理
@@ -266,36 +266,177 @@
   - Gitコミットとプッシュ（feat: implement event integration system）
   - _要件: 設計文書に基づくイベント統合システムの実装_
 
-- [ ] 3.3.3 World統合機能の実装
-  - **事前確認**: World統合設計文書（docs/architecture/ecs/world.md）を確認
-  - **EntityFactory統合実装**:
-    - ブループリントベースエンティティ作成
-    - デフォルトブループリント登録
-    - ブループリント管理機能
-  - **QuerySystem統合実装**:
-    - 高度なエンティティクエリ機能
-    - クエリキャッシュ機能
-    - クエリパフォーマンス最適化
-  - **PerformanceMonitor統合実装**:
-    - システム実行時間監視
-    - メモリ使用量監視
-    - パフォーマンス統計レポート
-  - **React統合インターフェース実装**:
-    - useWorld カスタムフック
-    - バッチ更新機能
-    - 状態同期機能
-  - **World統合テスト実装**:
-    - EntityFactory統合テスト
-    - QuerySystem統合テスト
-    - PerformanceMonitor統合テスト
-    - React統合テスト
-  - **動作確認**: EntityFactoryがブループリントベースでエンティティを作成できることを確認
-  - **動作確認**: QuerySystemが高度なクエリ機能を提供することを確認
-  - **動作確認**: PerformanceMonitorがシステム性能を監視できることを確認
-  - **動作確認**: `npm run test`でWorld統合テストが全て通ることを確認
+- [x] 3.3.3 QuerySystem統合実装
+  - **事前確認**: QuerySystem設計文書（docs/architecture/ecs/query-system.md）とAPI仕様書（docs/api/ecs-query-system.md）を確認
+  - **QuerySystemクラス実装**:
+    - QuerySystemクラスの基本実装（docs/architecture/ecs/query-system.md準拠）
+    - QueryFilterとAdvancedQueryFilterインターフェースの実装
+    - QueryBuilderクラスの流暢なインターフェース実装
+    - QueryResultとQueryExecutionStatsの実装
+  - **インデックス管理実装**:
+    - EntityIndexクラスの実装（コンポーネント別、複合インデックス）
+    - SpatialIndexクラスの実装（QuadTree、空間検索）
+    - インデックス自動更新とバージョン管理の実装
+  - **キャッシュとオプティマイザー実装**:
+    - QueryCacheクラスの実装（LRU、TTL機能）
+    - QueryOptimizerクラスの実装（実行計画最適化）
+    - パフォーマンス統計とメトリクス収集の実装
+  - **World統合**:
+    - World.query()メソッドの追加
+    - World.queryBuilder()メソッドの追加
+    - World.invalidateQueryCache()メソッドの追加
+    - 自動インデックス管理の統合
+  - **QuerySystem統合テスト実装**:
+    - 基本クエリテスト（all, any, none, where条件）
+    - 高度なクエリテスト（空間検索、範囲検索、テキスト検索）
+    - キャッシュ機能テスト（ヒット率、TTL、無効化）
+    - パフォーマンステスト（50エンティティでクエリ<1ms）
+  - **動作確認**: QuerySystemが基本的なクエリ機能（all, any, none, where）を正しく実行することを確認
+  - **動作確認**: 高度なクエリ機能（空間検索、範囲検索、テキスト検索）が期待通りに動作することを確認
+  - **動作確認**: キャッシュ機能が正常に動作し、パフォーマンス向上が確認できることを確認
+  - **動作確認**: `npm run test`でQuerySystem統合テストが全て通ることを確認
+  - **動作確認**: 50個のエンティティでのクエリが1ms以内で完了することを確認
   - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement World integration features）
-  - _要件: 設計文書に基づくWorld統合機能の実装_
+  - Gitコミットとプッシュ（feat: implement QuerySystem integration）
+  - _要件: docs/architecture/ecs/query-system.md、docs/api/ecs-query-system.md に基づくQuerySystem統合実装_
+
+- [ ] 3.3.4 PerformanceMonitor統合実装
+  - **事前確認**: PerformanceMonitor設計文書（docs/architecture/ecs/performance-monitor.md）とAPI仕様書（docs/api/ecs-performance-monitor.md）を確認
+  - **PerformanceMonitorクラス実装**:
+    - PerformanceMonitorクラスの基本実装（docs/architecture/ecs/performance-monitor.md準拠）
+    - PerformanceMonitorOptionsとPerformanceReportの実装
+    - 監視の有効化・無効化機能の実装
+  - **SystemMonitor実装**:
+    - SystemMonitorクラスの実装（実行時間監視、統計収集）
+    - ExecutionTokenとSystemExecutionResultの実装
+    - システムメトリクス収集と分析機能の実装
+    - 遅いシステム検出とアラート機能の実装
+  - **MemoryMonitor実装**:
+    - MemoryMonitorクラスの実装（メモリスナップショット、推移分析）
+    - MemorySnapshotとMemoryTrendの実装
+    - メモリリーク検出とOptimizationSuggestionの実装
+    - 継続的監視とアラート機能の実装
+  - **EntityMonitor実装**:
+    - EntityMonitorクラスの実装（ライフサイクル統計、パターン分析）
+    - EntityLifecycleStatsとEntityCreationAnalysisの実装
+    - メモリ効率分析とパフォーマンス影響分析の実装
+  - **ReportGenerator実装**:
+    - ReportGeneratorクラスの実装（総合レポート生成）
+    - HTML、JSON、CSVレポート生成機能の実装
+  - **World統合**:
+    - World.getPerformanceStats()メソッドの追加
+    - システム実行の自動監視統合
+    - メモリ使用量の自動追跡統合
+  - **PerformanceMonitor統合テスト実装**:
+    - システム監視テスト（実行時間計測、統計収集）
+    - メモリ監視テスト（スナップショット、リーク検出）
+    - エンティティ監視テスト（ライフサイクル、パターン分析）
+    - レポート生成テスト（HTML、JSON、CSV）
+  - **動作確認**: SystemMonitorがシステム実行時間を正確に計測し、統計を収集することを確認
+  - **動作確認**: MemoryMonitorがメモリ使用量を監視し、リーク検出が動作することを確認
+  - **動作確認**: EntityMonitorがエンティティライフサイクルを追跡し、分析結果を提供することを確認
+  - **動作確認**: ReportGeneratorが各形式のレポートを正常に生成することを確認
+  - **動作確認**: `npm run test`でPerformanceMonitor統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement PerformanceMonitor integration）
+  - _要件: docs/architecture/ecs/performance-monitor.md、docs/api/ecs-performance-monitor.md に基づくPerformanceMonitor統合実装_
+
+- [ ] 3.3.5 EntityFactory統合完成
+  - **事前確認**: World統合設計文書（docs/architecture/ecs/world.md）とAPI仕様書（docs/api/world-integration.md）を確認
+  - **BlueprintRegistry実装**:
+    - BlueprintRegistryクラスの実装（docs/api/world-integration.md準拠）
+    - BlueprintInfoとEntityBlueprintインターフェースの実装
+    - ブループリント登録・解除・情報取得機能の実装
+  - **EntityBlueprint実装**:
+    - EntityBlueprint基底クラスの実装
+    - IdeaBlueprintクラスの完全実装（バリデーション、作成前後処理）
+    - ThemeBlueprintクラスの完全実装（バリデーション、作成前後処理）
+    - CreateEntityOptionsインターフェースの実装
+  - **World統合**:
+    - World.registerBlueprint()メソッドの追加
+    - World.createEntityFromBlueprint()メソッドの追加
+    - World.getAvailableBlueprints()メソッドの追加
+    - World.unregisterBlueprint()、World.hasBlueprint()、World.getBlueprintInfo()メソッドの追加
+    - デフォルトブループリント（idea、theme）の自動登録
+  - **EntityFactory統合テスト実装**:
+    - ブループリント登録・解除テスト
+    - IdeaBlueprintとThemeBlueprintの作成テスト
+    - バリデーション機能テスト
+    - エラーハンドリングテスト（無効なブループリント、バリデーション失敗）
+  - **動作確認**: BlueprintRegistryがブループリントの登録・解除・情報取得を正常に行うことを確認
+  - **動作確認**: IdeaBlueprintとThemeBlueprintが適切なコンポーネント構成でエンティティを作成することを確認
+  - **動作確認**: バリデーション機能が無効な入力を適切に拒否することを確認
+  - **動作確認**: World統合メソッドが期待通りに動作することを確認
+  - **動作確認**: `npm run test`でEntityFactory統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: complete EntityFactory integration）
+  - _要件: docs/architecture/ecs/world.md、docs/api/world-integration.md に基づくEntityFactory統合完成_
+
+- [ ] 3.3.6 React統合インターフェース実装
+  - **事前確認**: React統合設計文書（docs/architecture/ecs/react-integration.md）とAPI仕様書（docs/api/react-integration.md）を確認
+  - **useWorldフック実装**:
+    - useWorldフックの基本実装（docs/api/react-integration.md準拠）
+    - UseWorldOptionsとUseWorldResultインターフェースの実装
+    - 自動同期、バッチ更新、メモ化機能の実装
+    - エラーハンドリングとローディング状態管理の実装
+  - **StateSynchronizer実装**:
+    - StateSynchronizerクラスの実装（状態同期管理）
+    - SyncSubscriberとSyncOperationインターフェースの実装
+    - 同期キューとイベントリスナー管理の実装
+  - **BatchUpdater実装**:
+    - BatchUpdaterクラスの実装（バッチ更新管理）
+    - BatchOperationとBatchUpdaterOptionsの実装
+    - バッチスケジューリングと強制実行機能の実装
+  - **ECSProvider実装**:
+    - ECSProviderコンポーネントの実装
+    - ECSContextとECSContextProviderの実装
+    - World、EventBus、StateSynchronizer、BatchUpdaterの統合
+  - **高レベルコンポーネント実装**:
+    - EntityRendererコンポーネントの実装
+    - QueryRendererコンポーネントの実装
+    - VirtualizedEntityListコンポーネントの実装
+  - **React統合テスト実装**:
+    - useWorldフックテスト（状態同期、バッチ更新、エラーハンドリング）
+    - ECSProviderテスト（コンテキスト提供、統合機能）
+    - 高レベルコンポーネントテスト（レンダリング、エラーバウンダリ）
+    - パフォーマンステスト（メモ化、仮想化）
+  - **動作確認**: useWorldフックがWorld統合、状態同期、バッチ更新を正しく提供することを確認
+  - **動作確認**: StateSynchronizerとBatchUpdaterが期待通りに動作することを確認
+  - **動作確認**: ECSProviderが適切にコンテキストを提供することを確認
+  - **動作確認**: 高レベルコンポーネントが正常にレンダリングされることを確認
+  - **動作確認**: `npm run test`でReact統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement React integration interface）
+  - _要件: docs/architecture/ecs/react-integration.md、docs/api/react-integration.md に基づくReact統合インターフェース実装_
+
+- [ ] 3.3.7 World統合機能の最終統合テスト
+  - **事前確認**: 全ての統合機能（QuerySystem、PerformanceMonitor、EntityFactory、React統合）が実装済みであることを確認
+  - **統合シナリオテスト実装**:
+    - 全機能連携動作テスト（QuerySystem + PerformanceMonitor + EntityFactory + React統合）
+    - エンドツーエンドシナリオテスト（ブループリント作成 → クエリ実行 → パフォーマンス監視 → React表示）
+    - 大量データテスト（50個エンティティでの全機能動作確認）
+    - エラー復旧テスト（各統合機能のエラーハンドリング連携）
+  - **パフォーマンス統合テスト**:
+    - クエリパフォーマンステスト（50エンティティでクエリ<1ms）
+    - 更新パフォーマンステスト（50エンティティで更新<5ms）
+    - メモリ使用量テスト（統合機能使用時のメモリ効率）
+    - React統合パフォーマンステスト（再レンダリング最適化確認）
+  - **品質保証テスト**:
+    - テストカバレッジ測定（80%以上の確認）
+    - 静的解析実行（TypeScript型チェック、ESLint）
+    - ドキュメント整合性確認（実装とAPI仕様書の一致確認）
+  - **最終動作確認**:
+    - 全統合機能が設計文書通りに動作することを確認
+    - パフォーマンス要件（クエリ<1ms、更新<5ms）を満たすことを確認
+    - React統合が状態同期、バッチ更新を正しく提供することを確認
+    - エラーハンドリングが各レイヤーで適切に動作することを確認
+  - **動作確認**: 全統合機能が連携して正常に動作することを確認
+  - **動作確認**: パフォーマンス要件を満たすことを確認
+  - **動作確認**: `npm run test`で全統合テストが通り、カバレッジが80%以上であることを確認
+  - **動作確認**: 実装が全ての関連ドキュメント（設計書、API仕様書）と整合していることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: complete World integration with comprehensive testing）
+  - _要件: 全統合機能の連携動作とパフォーマンス要件の達成_
 
 - [ ] 3.4 AnimationSystem設計の見直しと実装
   - **現状分析**: 既存のAnimationSystem実装と設計文書の整合性確認

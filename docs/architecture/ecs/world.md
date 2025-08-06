@@ -528,33 +528,269 @@ class World {
 ```typescript
 class World {
   private entityFactory: EntityFactory;
+  private blueprintRegistry: BlueprintRegistry;
   
   constructor(eventBus: EventBus) {
     // ... 他の初期化
-    this.entityFactory = new EntityFactory();
+    this.blueprintRegistry = new BlueprintRegistry();
+    this.entityFactory = new EntityFactory(this);
     this.registerDefaultBlueprints();
   }
   
   // ブループリント登録
   registerBlueprint(blueprint: EntityBlueprint): void {
-    this.entityFactory.registerBlueprint(blueprint);
+    this.blueprintRegistry.register(blueprint);
   }
   
   // ブループリントからエンティティ作成
   createEntityFromBlueprint(blueprintName: string, ...args: any[]): EntityId {
-    return this.entityFactory.create(blueprintName, this, ...args);
+    const blueprint = this.blueprintRegistry.get(blueprintName);
+    if (!blueprint) {
+      throw new Error(`Blueprint not found: ${blueprintName}`);
+    }
+    
+    return blueprint.create(this, ...args);
   }
   
   // デフォルトブループリント登録
   private registerDefaultBlueprints(): void {
-    this.registerBlueprint(IdeaBlueprint);
-    this.registerBlueprint(ThemeBlueprint);
+    this.registerBlueprint(new IdeaBlueprint());
+    this.registerBlueprint(new ThemeBlueprint());
   }
   
   // 利用可能なブループリント一覧
   getAvailableBlueprints(): string[] {
-    return this.entityFactory.listBlueprints();
+    return this.blueprintRegistry.listBlueprints();
   }
+  
+  // ブループリント管理
+  unregisterBlueprint(blueprintName: string): boolean {
+    return this.blueprintRegistry.unregister(blueprintName);
+  }
+  
+  hasBlueprint(blueprintName: string): boolean {
+    return this.blueprintRegistry.has(blueprintName);
+  }
+  
+  getBlueprintInfo(blueprintName: string): BlueprintInfo | undefined {
+    return this.blueprintRegistry.getInfo(blueprintName);
+  }
+}
+
+// ブループリントレジストリ
+export class BlueprintRegistry {
+  private blueprints: Map<string, EntityBlueprint>;
+  private blueprintInfo: Map<string, BlueprintInfo>;
+
+  constructor() {
+    this.blueprints = new Map();
+    this.blueprintInfo = new Map();
+  }
+
+  register(blueprint: EntityBlueprint): void {
+    this.blueprints.set(blueprint.name, blueprint);
+    this.blueprintInfo.set(blueprint.name, {
+      name: blueprint.name,
+      description: blueprint.description,
+      requiredComponents: blueprint.requiredComponents,
+      optionalComponents: blueprint.optionalComponents,
+      registeredAt: new Date()
+    });
+  }
+
+  unregister(blueprintName: string): boolean {
+    const removed = this.blueprints.delete(blueprintName);
+    this.blueprintInfo.delete(blueprintName);
+    return removed;
+  }
+
+  get(blueprintName: string): EntityBlueprint | undefined {
+    return this.blueprints.get(blueprintName);
+  }
+
+  has(blueprintName: string): boolean {
+    return this.blueprints.has(blueprintName);
+  }
+
+  listBlueprints(): string[] {
+    return Array.from(this.blueprints.keys());
+  }
+
+  getInfo(blueprintName: string): BlueprintInfo | undefined {
+    return this.blueprintInfo.get(blueprintName);
+  }
+
+  getAllInfo(): BlueprintInfo[] {
+    return Array.from(this.blueprintInfo.values());
+  }
+}
+
+// エンティティブループリント基底クラス
+export abstract class EntityBlueprint {
+  abstract readonly name: string;
+  abstract readonly description: string;
+  abstract readonly requiredComponents: ComponentType[];
+  abstract readonly optionalComponents: ComponentType[];
+
+  abstract create(world: IWorld, ...args: any[]): EntityId;
+
+  // バリデーション
+  validate(world: IWorld, ...args: any[]): boolean {
+    return true;
+  }
+
+  // 作成前処理
+  beforeCreate(world: IWorld, ...args: any[]): void {
+    // オーバーライド可能
+  }
+
+  // 作成後処理
+  afterCreate(world: IWorld, entityId: EntityId, ...args: any[]): void {
+    // オーバーライド可能
+  }
+}
+
+// アイデアブループリント
+export class IdeaBlueprint extends EntityBlueprint {
+  readonly name = 'idea';
+  readonly description = 'Creates an idea entity with text, position, visual, and animation components';
+  readonly requiredComponents = [ComponentTypes.TEXT, ComponentTypes.POSITION, ComponentTypes.VISUAL];
+  readonly optionalComponents = [ComponentTypes.ANIMATION];
+
+  create(world: IWorld, text: string, options: CreateEntityOptions = {}): EntityId {
+    this.beforeCreate(world, text, options);
+
+    if (!this.validate(world, text, options)) {
+      throw new Error('Idea blueprint validation failed');
+    }
+
+    const entityId = world.createEntity();
+
+    try {
+      // テキストコンポーネント
+      const textComponent = createIdeaTextComponent(text, options.customTextOptions);
+      world.addComponent(entityId, textComponent);
+
+      // 位置コンポーネント
+      const index = getNextAvailableIndex(world);
+      const positionComponent = (options.x !== undefined && options.y !== undefined)
+        ? createPositionComponent(options.x, options.y, { index, zIndex: index, ...options.customPositionOptions })
+        : createPhyllotaxisPositionComponent(index, 0, 0, 400, 300);
+      world.addComponent(entityId, positionComponent);
+
+      // 視覚コンポーネント
+      const visualComponent = createIdeaVisualComponent(options.customVisualOptions);
+      world.addComponent(entityId, visualComponent);
+
+      // アニメーションコンポーネント（オプション）
+      if (options.withAnimation) {
+        const animationComponent = createAnimationComponent(
+          'fadeIn',
+          options.animationDuration ?? 500,
+          { isAnimating: true }
+        );
+        world.addComponent(entityId, animationComponent);
+      }
+
+      this.afterCreate(world, entityId, text, options);
+      return entityId;
+
+    } catch (error) {
+      world.destroyEntity(entityId);
+      throw error;
+    }
+  }
+
+  validate(world: IWorld, text: string, options: CreateEntityOptions = {}): boolean {
+    if (!text || text.trim().length === 0) {
+      return false;
+    }
+    if (text.length > 100) {
+      return false;
+    }
+    return true;
+  }
+}
+
+// テーマブループリント
+export class ThemeBlueprint extends EntityBlueprint {
+  readonly name = 'theme';
+  readonly description = 'Creates a theme entity with text, position, and visual components';
+  readonly requiredComponents = [ComponentTypes.TEXT, ComponentTypes.POSITION, ComponentTypes.VISUAL];
+  readonly optionalComponents = [ComponentTypes.ANIMATION];
+
+  create(world: IWorld, content: string, options: CreateEntityOptions = {}): EntityId {
+    this.beforeCreate(world, content, options);
+
+    if (!this.validate(world, content, options)) {
+      throw new Error('Theme blueprint validation failed');
+    }
+
+    const entityId = world.createEntity();
+
+    try {
+      // テキストコンポーネント
+      const textComponent = createThemeTextComponent(content, options.customTextOptions);
+      world.addComponent(entityId, textComponent);
+
+      // 位置コンポーネント（中心位置）
+      const positionComponent = createPositionComponent(
+        options.x ?? 400, // デフォルト中心X
+        options.y ?? 300, // デフォルト中心Y
+        { index: -1, zIndex: 1000, ...options.customPositionOptions }
+      );
+      world.addComponent(entityId, positionComponent);
+
+      // 視覚コンポーネント
+      const visualComponent = createThemeVisualComponent(options.customVisualOptions);
+      world.addComponent(entityId, visualComponent);
+
+      // アニメーションコンポーネント（オプション）
+      if (options.withAnimation) {
+        const animationComponent = createAnimationComponent(
+          'fadeIn',
+          options.animationDuration ?? 500,
+          { isAnimating: true }
+        );
+        world.addComponent(entityId, animationComponent);
+      }
+
+      this.afterCreate(world, entityId, content, options);
+      return entityId;
+
+    } catch (error) {
+      world.destroyEntity(entityId);
+      throw error;
+    }
+  }
+
+  validate(world: IWorld, content: string, options: CreateEntityOptions = {}): boolean {
+    if (!content || content.trim().length === 0) {
+      return false;
+    }
+    if (content.length > 50) {
+      return false;
+    }
+    return true;
+  }
+}
+
+interface BlueprintInfo {
+  name: string;
+  description: string;
+  requiredComponents: ComponentType[];
+  optionalComponents: ComponentType[];
+  registeredAt: Date;
+}
+
+interface CreateEntityOptions {
+  x?: number;
+  y?: number;
+  withAnimation?: boolean;
+  animationDuration?: number;
+  customTextOptions?: Partial<ITextComponent>;
+  customVisualOptions?: Partial<IVisualComponent>;
+  customPositionOptions?: Partial<IPositionComponent>;
 }
 ```
 

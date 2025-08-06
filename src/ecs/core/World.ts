@@ -10,6 +10,9 @@ import { SystemManager } from '@/ecs/core/SystemManager';
 import { LifecycleManager } from '@/ecs/core/LifecycleManager';
 import { EventBus } from '@/events/core/EventBus';
 import { SystemEvents, LifecycleEvents, IdeaEvents, UIEvents } from '@/events/types/EventTypes';
+import { QuerySystem, QuerySystemOptions, QuerySystemStats } from '@/ecs/query/QuerySystem';
+import { QueryFilter, AdvancedQueryFilter, QueryResult } from '@/ecs/query/types/QueryTypes';
+import { QueryBuilder } from '@/ecs/query/QueryBuilder';
 
 /**
  * エンティティ統計情報
@@ -50,10 +53,13 @@ export class World implements IWorld {
   private eventBus: EventBus;
   private lifecycleManager: LifecycleManager;
 
+  // クエリシステム
+  private querySystem: QuerySystem;
+
   // バージョン管理（キャッシュ無効化用）
   private version: number = 0;
 
-  constructor(eventBus: EventBus) {
+  constructor(eventBus: EventBus, querySystemOptions?: QuerySystemOptions) {
     this.entityPool = new EntityPool();
     this.entities = new Set();
     this.componentIndex = new Map();
@@ -68,6 +74,9 @@ export class World implements IWorld {
 
     this.initializeComponentStorage();
     this.setupEventListeners();
+    
+    // QuerySystemを初期化（Worldが完全に初期化された後）
+    this.querySystem = new QuerySystem(this, querySystemOptions);
   }
 
   /**
@@ -575,6 +584,43 @@ export class World implements IWorld {
     return entitiesMemory + componentsMemory;
   }
 
+  // ===== QuerySystem統合 =====
+
+  /**
+   * 基本クエリを実行
+   */
+  query(filter: QueryFilter): QueryResult {
+    return this.querySystem.query(filter);
+  }
+
+  /**
+   * 高度なクエリを実行
+   */
+  queryAdvanced(filter: AdvancedQueryFilter): QueryResult {
+    return this.querySystem.queryAdvanced(filter);
+  }
+
+  /**
+   * QueryBuilderを作成
+   */
+  queryBuilder(): QueryBuilder {
+    return this.querySystem.createBuilder();
+  }
+
+  /**
+   * クエリキャッシュを無効化
+   */
+  invalidateQueryCache(): void {
+    this.querySystem.invalidateCache();
+  }
+
+  /**
+   * QuerySystem統計を取得
+   */
+  getQuerySystemStats(): QuerySystemStats {
+    return this.querySystem.getStats();
+  }
+
   // ===== クリーンアップ =====
 
   /**
@@ -602,6 +648,7 @@ export class World implements IWorld {
     this.componentManager.clear();
     this.systemManager.clear();
     this.lifecycleManager.cleanup();
+    this.querySystem.cleanup();
     this.version = 0;
   }
 
