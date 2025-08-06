@@ -4,6 +4,8 @@
 
 import { ISystem, SystemStats, IWorld } from '@/ecs/core/System';
 import { EntityId } from '@/ecs/core/Entity';
+import { EventBus } from '@/events/core/EventBus';
+import { SystemEvents } from '@/events/types/EventTypes';
 
 /**
  * システムの管理と実行を行うマネージャー
@@ -12,6 +14,11 @@ export class SystemManager {
   private systems: ISystem[] = [];
   private isRunning: boolean = false;
   private performanceStats: Map<string, number[]> = new Map();
+  private eventBus?: EventBus;
+
+  constructor(eventBus?: EventBus) {
+    this.eventBus = eventBus;
+  }
 
   /**
    * システムを追加
@@ -94,6 +101,18 @@ export class SystemManager {
         this.recordSystemPerformance(system.name, endTime - startTime);
       } catch (error) {
         console.error(`Error in system ${system.name}:`, error);
+        
+        // エラーイベント発火
+        if (this.eventBus) {
+          this.eventBus.emit(SystemEvents.ERROR_OCCURRED, {
+            source: system.name,
+            message: error instanceof Error ? error.message : String(error),
+            error: error instanceof Error ? error : undefined,
+            recoverable: true,
+            timestamp: new Date()
+          });
+        }
+        
         // エラーが発生してもシステム実行を継続
       }
     }

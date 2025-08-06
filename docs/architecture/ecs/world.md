@@ -16,12 +16,108 @@ created: 2025-02-08
 > [!info] 概要
 > ECSアーキテクチャの中核となるWorldクラスの設計と実装詳細を説明します。
 
-## World概要
+## World統合アーキテクチャ設計
 
-### 🌍 基本概念
+### 🌍 統合アーキテクチャ概要
 
 > [!note] 責務
-> ECSの中央管理システム。エンティティ、コンポーネント、システムを統合管理
+> ECSの中央管理システム + イベント統合 + 外部システム連携
+
+```mermaid
+graph TB
+    subgraph "World Core"
+        EM[EntityManager]
+        CM[ComponentManager]
+        SM[SystemManager]
+        EB[EventBus Integration]
+    end
+    
+    subgraph "Data Layer"
+        EP[EntityPool]
+        CS[ComponentStore]
+        EI[EntityIndex]
+        VT[VersionTracker]
+    end
+    
+    subgraph "Integration Layer"
+        EF[EntityFactory]
+        QS[QuerySystem]
+        LC[LifecycleManager]
+        PM[PerformanceMonitor]
+    end
+    
+    subgraph "External Interface"
+        React[React Hooks]
+        Events[Event Listeners]
+        Systems[System Registry]
+    end
+    
+    EM --> EP
+    CM --> CS
+    SM --> Systems
+    EB --> Events
+    
+    EF --> EM
+    QS --> EI
+    LC --> EB
+    PM --> VT
+    
+    React --> QS
+    Events --> LC
+    Systems --> SM
+```
+
+### 🏗️ World統合設計仕様
+
+```typescript
+// ecs/core/World.ts
+export class World implements IWorld {
+  // === コア管理システム ===
+  private entityManager: EntityManager;
+  private componentManager: ComponentManager;
+  private systemManager: SystemManager;
+  
+  // === イベント統合 ===
+  private eventBus: EventBus;
+  private lifecycleManager: LifecycleManager;
+  
+  // === 外部統合 ===
+  private entityFactory: EntityFactory;
+  private querySystem: QuerySystem;
+  
+  // === パフォーマンス管理 ===
+  private versionTracker: VersionTracker;
+  private performanceMonitor: PerformanceMonitor;
+
+  constructor(eventBus: EventBus) {
+    // コア初期化
+    this.entityManager = new EntityManager();
+    this.componentManager = new ComponentManager();
+    this.systemManager = new SystemManager();
+    
+    // イベント統合初期化
+    this.eventBus = eventBus;
+    this.lifecycleManager = new LifecycleManager(eventBus);
+    
+    // 外部統合初期化
+    this.entityFactory = new EntityFactory();
+    this.querySystem = new QuerySystem(this);
+    
+    // パフォーマンス管理初期化
+    this.versionTracker = new VersionTracker();
+    this.performanceMonitor = new PerformanceMonitor();
+    
+    // 統合セットアップ
+    this.setupIntegrations();
+  }
+  
+  private setupIntegrations(): void {
+    this.setupEventListeners();
+    this.setupSystemIntegration();
+    this.setupLifecycleHooks();
+  }
+}
+```
 
 ```mermaid
 graph TB

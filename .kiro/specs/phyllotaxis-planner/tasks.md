@@ -161,7 +161,7 @@
   - Gitコミットとプッシュ（fix: refine ECS component design and resolve type errors）
   - _要件: 実装済みコンポーネントの設計整合性確保_
 
-- [ ] 3.2 エンティティ管理システムの実装とテスト
+- [x] 3.2 エンティティ管理システムの実装とテスト
   - **事前確認**: コーディング規約とベストプラクティス文書（docs/guides/coding-standards.md）を確認
   - **設計確認**: ECSエンティティ設計文書（docs/architecture/ecs/entities.md）とAPI仕様書（docs/api/ecs-entities.md）を確認
   - EntityFactory.ts - メインのエンティティ作成機能の実装
@@ -188,33 +188,114 @@
   - Gitコミットとプッシュ（feat: implement entity management system with tests）
   - _要件: 1.2, 2.2_
 
-- [ ] 3.3 ECSシステム設計の見直しと基盤実装
+- [x] 3.3 ECSシステム設計の見直しと基盤実装
   - **現状分析**: 既存のECSシステム実装（src/ecs/systems/）と設計文書の整合性確認
   - **設計課題の特定**:
     - システム基底クラスとインターフェースの不整合
     - World実装とシステム連携の仕様不明確
     - SystemManagerの実装不足
     - システム間の依存関係とイベントフローの曖昧さ
-  - **システム基盤の実装**:
-    - World.ts - ECSワールドの完全な実装
-    - SystemManager.ts - システム登録・実行管理
-    - BaseSystem抽象クラスの改良
-    - システム優先度とライフサイクル管理
+  - **理想的なECSシステム設計の策定**:
+    - システム実行フロー設計（3フェーズ実行モデル）
+    - イベント統合パターン設計（システム間連携）
+    - World統合アーキテクチャ設計（EventBus統合）
   - **設計文書の更新**:
-    - docs/architecture/ecs/systems.md の具体化
-    - docs/architecture/ecs/world.md の作成
-    - docs/api/ecs-systems.md の完全な仕様記述
-  - **システム基盤のテスト実装**:
-    - World機能の単体テスト（エンティティ・コンポーネント管理）
-    - SystemManager機能の単体テスト（システム登録・実行）
-    - システム間連携の統合テスト
-  - **動作確認**: World実装でエンティティ・コンポーネント管理が正常に動作することを確認
-  - **動作確認**: SystemManagerでシステム登録・実行が適切に動作することを確認
-  - **動作確認**: システム優先度とライフサイクルが正しく管理されることを確認
-  - **動作確認**: `npm run test`でECSシステム基盤のテストが全て通ることを確認
+    - docs/architecture/ecs/systems.md の完全な設計仕様化
+    - docs/architecture/ecs/world.md の統合アーキテクチャ設計
+    - docs/api/ecs-systems.md の新設計に基づく仕様更新
+  - **動作確認**: 設計文書が実装可能な詳細レベルで記述されていることを確認
+  - **動作確認**: システム実行フロー、イベント統合、World統合の設計が整合していることを確認
+  - **動作確認**: API仕様書が新設計と一致していることを確認
   - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement ECS system foundation with tests）
-  - _要件: ECSシステム基盤の確立_
+  - Gitコミットとプッシュ（docs: refine ECS system design and architecture）
+  - _要件: ECSシステム設計の確立_
+
+- [ ] 3.3.1 ECSコア基盤の設計実装
+  - **事前確認**: 更新されたECS設計文書（docs/architecture/ecs/systems.md, world.md）を確認
+  - **System.ts の設計実装**:
+    - ISystemインターフェースの実装（設計文書準拠）
+    - BaseSystem抽象クラスの実装（3フェーズ実行モデル）
+    - IWorldインターフェースの完全定義
+    - SystemStats型定義の実装
+  - **World.ts の設計実装**:
+    - EventBus統合機能の実装
+    - EntityFactory統合機能の実装
+    - QuerySystem統合機能の実装
+    - LifecycleManager統合機能の実装
+    - PerformanceMonitor統合機能の実装
+  - **SystemManager.ts の設計実装**:
+    - 優先度ベースシステム実行の実装
+    - システムライフサイクル管理の実装
+    - パフォーマンス統計機能の実装
+    - エラーハンドリング機能の実装
+  - **統合テストの実装**:
+    - ECSコア統合テスト（World + SystemManager + EventBus）
+    - システム実行フローテスト（3フェーズ実行）
+    - イベント統合テスト（システム間連携）
+  - **動作確認**: ISystemインターフェースが設計文書通りに実装されていることを確認
+  - **動作確認**: WorldがEventBus統合、EntityFactory統合機能を持つことを確認
+  - **動作確認**: SystemManagerが優先度ベース実行を正しく行うことを確認
+  - **動作確認**: `npm run test`でECSコア統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement ECS core foundation based on refined design）
+  - _要件: 設計文書に基づくECSコア基盤の実装_
+
+- [ ] 3.3.2 イベント統合システムの実装
+  - **事前確認**: イベント統合設計文書（docs/architecture/ecs/systems.md）を確認
+  - **LifecycleManager実装**:
+    - エンティティライフサイクルイベント管理
+    - コンポーネント変更イベント管理
+    - システム処理イベント管理
+  - **EventBus統合実装**:
+    - WorldとEventBusの統合
+    - システム間イベント連携の実装
+    - 外部システム（React）との連携インターフェース
+  - **型安全なイベントシステム実装**:
+    - SystemEventMapの実装
+    - 型安全なイベント発火機能
+    - イベントリスナー管理機能
+  - **イベント統合テスト実装**:
+    - システム間イベント連携テスト
+    - ライフサイクルイベントテスト
+    - 外部統合イベントテスト
+  - **動作確認**: LifecycleManagerがエンティティ・コンポーネントのライフサイクルイベントを正しく発火することを確認
+  - **動作確認**: システム間でイベント連携が正常に動作することを確認
+  - **動作確認**: 型安全なイベントシステムが期待通りに動作することを確認
+  - **動作確認**: `npm run test`でイベント統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement event integration system）
+  - _要件: 設計文書に基づくイベント統合システムの実装_
+
+- [ ] 3.3.3 World統合機能の実装
+  - **事前確認**: World統合設計文書（docs/architecture/ecs/world.md）を確認
+  - **EntityFactory統合実装**:
+    - ブループリントベースエンティティ作成
+    - デフォルトブループリント登録
+    - ブループリント管理機能
+  - **QuerySystem統合実装**:
+    - 高度なエンティティクエリ機能
+    - クエリキャッシュ機能
+    - クエリパフォーマンス最適化
+  - **PerformanceMonitor統合実装**:
+    - システム実行時間監視
+    - メモリ使用量監視
+    - パフォーマンス統計レポート
+  - **React統合インターフェース実装**:
+    - useWorld カスタムフック
+    - バッチ更新機能
+    - 状態同期機能
+  - **World統合テスト実装**:
+    - EntityFactory統合テスト
+    - QuerySystem統合テスト
+    - PerformanceMonitor統合テスト
+    - React統合テスト
+  - **動作確認**: EntityFactoryがブループリントベースでエンティティを作成できることを確認
+  - **動作確認**: QuerySystemが高度なクエリ機能を提供することを確認
+  - **動作確認**: PerformanceMonitorがシステム性能を監視できることを確認
+  - **動作確認**: `npm run test`でWorld統合テストが全て通ることを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: implement World integration features）
+  - _要件: 設計文書に基づくWorld統合機能の実装_
 
 - [ ] 3.4 AnimationSystem設計の見直しと実装
   - **現状分析**: 既存のAnimationSystem実装と設計文書の整合性確認

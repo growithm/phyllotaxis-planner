@@ -59,26 +59,29 @@ export type ComponentType = typeof ComponentTypes[keyof typeof ComponentTypes];
 
 ```typescript
 // ecs/core/System.ts
-interface System {
+export interface ISystem {
   readonly name: string;
   readonly requiredComponents: ComponentType[];
   readonly priority: number;
   
-  update(entities: EntityId[], world: World, deltaTime: number): void;
+  update(entities: EntityId[], world: IWorld, deltaTime: number): void;
 }
 
-abstract class BaseSystem implements System {
+export abstract class BaseSystem implements ISystem {
   abstract readonly name: string;
   abstract readonly requiredComponents: ComponentType[];
-  readonly priority: number = 0;
-  
+  readonly priority: number;
+
   constructor(priority: number = 0) {
     this.priority = priority;
   }
-  
-  abstract update(entities: EntityId[], world: World, deltaTime: number): void;
-  
-  protected filterEntities(entities: EntityId[], world: World): EntityId[] {
+
+  abstract update(entities: EntityId[], world: IWorld, deltaTime: number): void;
+
+  /**
+   * 必要なコンポーネントを持つエンティティのみをフィルタリング
+   */
+  protected filterEntities(entities: EntityId[], world: IWorld): EntityId[] {
     return entities.filter(entityId => 
       this.requiredComponents.every(type => 
         world.hasComponent(entityId, type)
@@ -92,30 +95,49 @@ abstract class BaseSystem implements System {
 
 ```typescript
 // ecs/core/World.ts
-interface World {
+export interface IWorld {
   // エンティティ管理
   createEntity(): EntityId;
-  destroyEntity(id: EntityId): boolean;
-  hasEntity(id: EntityId): boolean;
+  destroyEntity(entityId: EntityId): boolean;
+  hasEntity(entityId: EntityId): boolean;
   getAllEntities(): EntityId[];
   
   // コンポーネント管理
-  addComponent<T extends IComponent>(entityId: EntityId, component: T): void;
-  removeComponent(entityId: EntityId, type: ComponentType): boolean;
-  getComponent<T extends IComponent>(entityId: EntityId, type: ComponentType): T | undefined;
   hasComponent(entityId: EntityId, type: ComponentType): boolean;
+  getComponent<T extends IComponent>(entityId: EntityId, type: ComponentType): T | undefined;
+  addComponent<T extends IComponent>(entityId: EntityId, component: T): void;
+  removeComponent(entityId: EntityId, type: ComponentType): void;
   
   // システム管理
-  addSystem(system: System): void;
+  addSystem(system: ISystem): void;
   removeSystem(systemName: string): boolean;
   update(deltaTime: number): void;
   
   // クエリ
-  query(filter: QueryFilter): EntityId[];
+  getEntitiesWithComponents(...componentTypes: ComponentType[]): EntityId[];
+  getEntitiesWithAnyComponent(...componentTypes: ComponentType[]): EntityId[];
+  getEntitiesWithoutComponents(...componentTypes: ComponentType[]): EntityId[];
   
-  // ユーティリティ
+  // エンティティファクトリ統合
+  createEntityFromBlueprint(blueprintName: string, ...args: any[]): EntityId;
+  registerBlueprint(blueprint: EntityBlueprint): void;
+  
+  // バッチ操作
+  batchUpdate(operations: () => void): void;
+  
+  // 統計・ユーティリティ
   getVersion(): number;
+  getEntityStats(): EntityStats;
+  getComponentStats(): ComponentStats;
+  getSystemStats(): SystemStats[];
+  getPerformanceStats(): PerformanceStats;
   cleanup(): void;
+}
+
+export class World implements IWorld {
+  constructor(eventBus: EventBus) {
+    // イベントバス統合が必須
+  }
 }
 ```#
 # コンポーネント仕様
@@ -236,7 +258,7 @@ class PhyllotaxisSystem extends BaseSystem {
     super(priority);
   }
   
-  update(entities: EntityId[], world: World, deltaTime: number): void {
+  update(entities: EntityId[], world: IWorld, deltaTime: number): void {
     const processableEntities = this.filterEntities(entities, world);
     
     processableEntities.forEach((entityId, index) => {
@@ -279,7 +301,7 @@ class AnimationSystem extends BaseSystem {
     super(priority);
   }
   
-  update(entities: EntityId[], world: World, deltaTime: number): void {
+  update(entities: EntityId[], world: IWorld, deltaTime: number): void {
     const animatingEntities = this.filterEntities(entities, world)
       .filter(entityId => {
         const animation = world.getComponent<IAnimationComponent>(entityId, ComponentTypes.ANIMATION);
@@ -291,7 +313,7 @@ class AnimationSystem extends BaseSystem {
     });
   }
   
-  private updateAnimation(entityId: EntityId, world: World, deltaTime: number): void {
+  private updateAnimation(entityId: EntityId, world: IWorld, deltaTime: number): void {
     const animation = world.getComponent<IAnimationComponent>(entityId, ComponentTypes.ANIMATION);
     if (!animation || !animation.isAnimating) return;
     
@@ -314,7 +336,7 @@ class AnimationSystem extends BaseSystem {
 interface EntityBlueprint {
   name: string;
   components: ComponentType[];
-  create(entityId: EntityId, world: World, ...args: any[]): void;
+  create(entityId: EntityId, world: IWorld, ...args: any[]): void;
 }
 
 export const IdeaBlueprint: EntityBlueprint = {
@@ -326,7 +348,7 @@ export const IdeaBlueprint: EntityBlueprint = {
     ComponentTypes.ANIMATION
   ],
   
-  create(entityId: EntityId, world: World, text: string) {
+  create(entityId: EntityId, world: IWorld, text: string) {
     world.addComponent(entityId, createTextComponent(text));
     world.addComponent(entityId, createPositionComponent());
     world.addComponent(entityId, createVisualComponent('leaf'));

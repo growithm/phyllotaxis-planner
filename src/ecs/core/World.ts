@@ -7,6 +7,8 @@ import { ComponentType, ComponentTypes, IComponent } from '@/ecs/core/Component'
 import { ISystem, IWorld, SystemStats } from '@/ecs/core/System';
 import { ComponentManager, ComponentStats } from '@/ecs/core/ComponentManager';
 import { SystemManager } from '@/ecs/core/SystemManager';
+import { EventBus } from '@/events/core/EventBus';
+import { SystemEvents, LifecycleEvents } from '@/events/types/EventTypes';
 
 /**
  * エンティティ統計情報
@@ -43,17 +45,30 @@ export class World implements IWorld {
   // システム管理
   private systemManager: SystemManager;
 
+  // イベント統合
+  private eventBus: EventBus;
+
   // バージョン管理（キャッシュ無効化用）
   private version: number = 0;
 
-  constructor() {
+  constructor(eventBus: EventBus) {
     this.entityPool = new EntityPool();
     this.entities = new Set();
     this.componentIndex = new Map();
     this.componentManager = new ComponentManager();
-    this.systemManager = new SystemManager();
+    this.systemManager = new SystemManager(eventBus);
+    this.eventBus = eventBus;
 
     this.initializeComponentStorage();
+    this.setupEventListeners();
+  }
+
+  /**
+   * イベントリスナーをセットアップ
+   */
+  private setupEventListeners(): void {
+    // 将来的にアイデア追加・削除イベントなどを処理
+    // 現在は基盤のみ実装
   }
 
   /**
@@ -75,6 +90,12 @@ export class World implements IWorld {
     this.componentIndex.set(entityId, new Set());
     this.incrementVersion();
 
+    // ライフサイクルイベント発火
+    this.eventBus.emit(LifecycleEvents.AFTER_CREATE, {
+      entityId,
+      timestamp: Date.now()
+    });
+
     return entityId;
   }
 
@@ -85,6 +106,12 @@ export class World implements IWorld {
     if (!this.entities.has(entityId)) {
       return false;
     }
+
+    // 削除前イベント発火
+    this.eventBus.emit(LifecycleEvents.BEFORE_DESTROY, {
+      entityId,
+      timestamp: Date.now()
+    });
 
     // すべてのコンポーネントを削除
     const componentTypes = this.componentIndex.get(entityId) || new Set();
@@ -97,6 +124,12 @@ export class World implements IWorld {
     this.componentIndex.delete(entityId);
     this.entityPool.release(entityId);
     this.incrementVersion();
+
+    // 削除後イベント発火
+    this.eventBus.emit(LifecycleEvents.AFTER_DESTROY, {
+      entityId,
+      timestamp: Date.now()
+    });
 
     return true;
   }
