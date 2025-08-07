@@ -552,21 +552,7 @@ export class World implements IWorld {
     return this.systemManager.getSystemStats(this);
   }
 
-  /**
-   * パフォーマンス統計を取得
-   */
-  getPerformanceStats(): PerformanceStats {
-    const componentStats = this.getComponentStats();
-    const componentCount = Object.values(componentStats).reduce((sum, count) => sum + count, 0);
 
-    return {
-      entityCount: this.entities.size,
-      componentCount,
-      systemCount: this.systemManager.getAllSystems().length,
-      version: this.version,
-      memoryUsage: this.estimateMemoryUsage()
-    };
-  }
 
   /**
    * 概算メモリ使用量を計算
@@ -619,6 +605,45 @@ export class World implements IWorld {
    */
   getQuerySystemStats(): QuerySystemStats {
     return this.querySystem.getStats();
+  }
+
+  // ===== PerformanceMonitor統合 =====
+
+  /**
+   * エンティティを取得（PerformanceMonitor用）
+   */
+  getEntity(entityId: EntityId): { components: Map<ComponentType, IComponent> } | undefined {
+    if (!this.entities.has(entityId)) {
+      return undefined;
+    }
+
+    const components = new Map<ComponentType, IComponent>();
+    const entityComponents = this.componentIndex.get(entityId) || new Set();
+    
+    entityComponents.forEach(type => {
+      const component = this.componentManager.getComponent(entityId, type);
+      if (component) {
+        components.set(type, component);
+      }
+    });
+
+    return { components };
+  }
+
+  /**
+   * PerformanceMonitor統合用の統計情報を取得
+   */
+  getPerformanceStats(): PerformanceStats {
+    const componentStats = this.getComponentStats();
+    const componentCount = Object.values(componentStats).reduce((sum, count) => sum + count, 0);
+
+    return {
+      entityCount: this.entities.size,
+      componentCount,
+      systemCount: this.systemManager.getAllSystems().length,
+      version: this.version,
+      memoryUsage: this.estimateMemoryUsage()
+    };
   }
 
   // ===== クリーンアップ =====

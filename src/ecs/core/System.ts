@@ -23,6 +23,10 @@ export interface IWorld {
   
   // バージョン管理
   getVersion?(): number;
+  
+  // PerformanceMonitor統合用
+  getEntity?(entityId: EntityId): { components: Map<ComponentType, import('@/ecs/core/Component').IComponent> } | undefined;
+  getComponentStats?(): Record<string, number>;
 }
 
 /**
