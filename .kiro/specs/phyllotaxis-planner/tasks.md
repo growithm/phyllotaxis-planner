@@ -300,7 +300,7 @@
   - Gitコミットとプッシュ（feat: implement QuerySystem integration）
   - _要件: docs/architecture/ecs/query-system.md、docs/api/ecs-query-system.md に基づくQuerySystem統合実装_
 
-- [ ] 3.3.4 PerformanceMonitor統合実装
+- [x] 3.3.4 PerformanceMonitor統合実装
   - **事前確認**: PerformanceMonitor設計文書（docs/architecture/ecs/performance-monitor.md）とAPI仕様書（docs/api/ecs-performance-monitor.md）を確認
   - **PerformanceMonitorクラス実装**:
     - PerformanceMonitorクラスの基本実装（docs/architecture/ecs/performance-monitor.md準拠）

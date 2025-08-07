@@ -26,3 +26,9 @@ export type {
   EntityValidation 
 } from './EntityManager';
 export { EntityManager } from './EntityManager';
+
+// ブループリント関連
+export { BlueprintRegistry } from './BlueprintRegistry';
+export { EntityBlueprint, type BlueprintInfo, type CreateEntityOptions as BlueprintCreateOptions } from './EntityBlueprint';
+export { IdeaBlueprint } from './IdeaBlueprint';
+export { ThemeBlueprint } from './ThemeBlueprint';
