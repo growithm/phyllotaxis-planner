@@ -54,6 +54,7 @@ export interface PositionCalculatedEvent {
   angle: number;
   radius: number;
   index: number;
+  timestamp: number;
 }
 
 /**
@@ -88,6 +89,16 @@ export interface ErrorEvent {
   recoveryEvent?: string;
   recoveryData?: unknown;
   timestamp: Date;
+}
+
+/**
+ * システムエラーイベントのデータ
+ */
+export interface SystemErrorEvent {
+  systemName: string;
+  entityId?: string;
+  error: string;
+  timestamp: number;
 }
 
 /**
@@ -198,7 +209,7 @@ export interface EventMap {
   [SystemEvents.ANIMATION_START]: AnimationEvent;
   [SystemEvents.ANIMATION_END]: AnimationEvent;
   [SystemEvents.RENDER_REQUESTED]: RenderRequestedEvent;
-  [SystemEvents.ERROR_OCCURRED]: ErrorEvent;
+  [SystemEvents.ERROR_OCCURRED]: SystemErrorEvent;
   [SystemEvents.SYSTEM_READY]: Record<string, never>; // 空のオブジェクト
   [SystemEvents.SYSTEM_PROCESSED]: SystemProcessedEvent;
   [SystemEvents.BATCH_UPDATE_COMPLETED]: BatchUpdateCompletedEvent;

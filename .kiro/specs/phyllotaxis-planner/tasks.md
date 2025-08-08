@@ -409,98 +409,99 @@
   - Gitコミットとプッシュ（feat: implement React integration interface）
   - _要件: docs/architecture/ecs/react-integration.md、docs/api/react-integration.md に基づくReact統合インターフェース実装_
 
-- [ ] 3.3.7 World統合機能の最終統合テスト
-  - **事前確認**: 全ての統合機能（QuerySystem、PerformanceMonitor、EntityFactory、React統合）が実装済みであることを確認
-  - **統合シナリオテスト実装**:
-    - 全機能連携動作テスト（QuerySystem + PerformanceMonitor + EntityFactory + React統合）
-    - エンドツーエンドシナリオテスト（ブループリント作成 → クエリ実行 → パフォーマンス監視 → React表示）
-    - 大量データテスト（50個エンティティでの全機能動作確認）
-    - エラー復旧テスト（各統合機能のエラーハンドリング連携）
-  - **パフォーマンス統合テスト**:
-    - クエリパフォーマンステスト（50エンティティでクエリ<1ms）
-    - 更新パフォーマンステスト（50エンティティで更新<5ms）
-    - メモリ使用量テスト（統合機能使用時のメモリ効率）
-    - React統合パフォーマンステスト（再レンダリング最適化確認）
-  - **品質保証テスト**:
-    - テストカバレッジ測定（80%以上の確認）
-    - 静的解析実行（TypeScript型チェック、ESLint）
-    - ドキュメント整合性確認（実装とAPI仕様書の一致確認）
-  - **最終動作確認**:
-    - 全統合機能が設計文書通りに動作することを確認
-    - パフォーマンス要件（クエリ<1ms、更新<5ms）を満たすことを確認
-    - React統合が状態同期、バッチ更新を正しく提供することを確認
-    - エラーハンドリングが各レイヤーで適切に動作することを確認
-  - **動作確認**: 全統合機能が連携して正常に動作することを確認
-  - **動作確認**: パフォーマンス要件を満たすことを確認
-  - **動作確認**: `npm run test`で全統合テストが通り、カバレッジが80%以上であることを確認
-  - **動作確認**: 実装が全ての関連ドキュメント（設計書、API仕様書）と整合していることを確認
-  - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: complete World integration with comprehensive testing）
-  - _要件: 全統合機能の連携動作とパフォーマンス要件の達成_
+- [ ] 3.4 PhyllotaxisSystem実装
+  - [ ] 3.4.1 PhyllotaxisSystem基本実装
+    - **事前確認**: フィロタキシス計算ユーティリティ（src/utils/phyllotaxis/）の実装確認
+    - **設計確認**: docs/architecture/ecs/systems.md のPhyllotaxisSystem仕様確認
+    - BaseSystemを継承したPhyllotaxisSystemクラスの実装
+    - 必要なコンポーネント（POSITION, TEXT）の定義
+    - 基本的なupdate()メソッドの実装（フィルタリング→処理→イベント発火）
+    - **動作確認**: PhyllotaxisSystemがBaseSystemを正しく継承していることを確認
+    - **動作確認**: 必要なコンポーネントを持つエンティティのみが処理されることを確認
+  - [ ] 3.4.2 フィロタキシス配置計算ロジック実装
+    - **事前確認**: src/utils/phyllotaxis/calculations.ts の実装内容確認
+    - フィロタキシス位置計算メソッドの実装
+    - 黄金角（137.5°）を使用した螺旋配置計算
+    - 中心テーマエンティティの除外ロジック
+    - 位置変更検知とコンポーネント更新
+    - **動作確認**: 黄金角による正確な螺旋配置が計算されることを確認
+    - **動作確認**: エンティティの位置が適切に更新されることを確認
+  - [ ] 3.4.3 イベント統合とテスト実装
+    - POSITION_CALCULATEDイベントの発火実装
+    - システム処理完了イベントの実装
+    - PhyllotaxisSystemの単体テスト実装
+    - システム統合テスト（World + PhyllotaxisSystem）
+    - **動作確認**: 位置計算完了時にイベントが正しく発火されることを確認
+    - **動作確認**: `npm run test`でPhyllotaxisSystemのテストが全て通ることを確認
+    - 全体の整合性確認とコードレビュー
+    - Gitコミットとプッシュ（feat: implement PhyllotaxisSystem with tests）
+    - _要件: 3.1, 3.2, フィロタキシス配置機能の完全実装_
 
-- [ ] 3.4 AnimationSystem設計の見直しと実装
-  - **現状分析**: 既存のAnimationSystem実装と設計文書の整合性確認
-  - **設計課題の特定**:
-    - AnimationComponentとの連携仕様の不明確
-    - CSS transitionとECSシステムの統合方法の曖昧さ
-    - アニメーション状態管理とライフサイクルの仕様不足
-    - イベント発火タイミングとフローの未定義
-  - **詳細仕様の策定**:
-    - AnimationSystemの具体的な動作仕様（更新頻度、処理順序）
-    - CSS transitionとの連携パターンとベストプラクティス
-    - アニメーション完了検知とイベント発火の仕組み
-    - パフォーマンス最適化戦略（大量エンティティ対応）
-  - **AnimationSystem実装**:
-    - BaseSystemを継承したAnimationSystemクラス
-    - アニメーション状態管理とCSS連携機能
-    - イベント発火とコールバック処理
-    - パフォーマンス監視と最適化機能
-  - **設計文書の更新**:
-    - docs/architecture/ecs/systems.md のAnimationSystem仕様追加
-    - docs/api/ecs-systems.md のAnimationSystem API記述
-  - **テスト実装**:
-    - AnimationSystemの単体テスト（システム実行、CSS連携、イベント処理）
-    - パフォーマンステスト（大量アニメーション処理）
-  - **動作確認**: AnimationSystemがECSシステムとして正常に登録・実行されることを確認
-  - **動作確認**: CSS transitionとの連携が適切に動作することを確認
-  - **動作確認**: アニメーション完了イベントが正しく発火されることを確認
-  - **動作確認**: `npm run test`でAnimationSystemのテストが全て通ることを確認
-  - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement AnimationSystem with refined design）
-  - _要件: 3.3, アニメーション機能の完全実装_
+- [ ] 3.5 AnimationSystem実装
+  - [ ] 3.5.1 AnimationSystem基本実装
+    - **事前確認**: AnimationComponent（src/ecs/components/AnimationComponent.ts）の実装確認
+    - **設計確認**: docs/architecture/ecs/systems.md のAnimationSystem仕様確認
+    - BaseSystemを継承したAnimationSystemクラスの実装
+    - 必要なコンポーネント（ANIMATION）の定義
+    - 基本的なupdate()メソッドの実装
+    - **動作確認**: AnimationSystemがBaseSystemを正しく継承していることを確認
+    - **動作確認**: アニメーション中のエンティティのみが処理されることを確認
+  - [ ] 3.5.2 アニメーション状態管理ロジック実装
+    - アニメーション進行度計算の実装
+    - CSS transitionとの連携機能
+    - アニメーション完了検知とコールバック処理
+    - 複数アニメーションタイプ（fadeIn, slideIn等）の対応
+    - **動作確認**: アニメーション進行度が正確に計算されることを確認
+    - **動作確認**: アニメーション完了時に適切に状態が更新されることを確認
+  - [ ] 3.5.3 イベント統合とテスト実装
+    - ANIMATION_START/ENDイベントの発火実装
+    - POSITION_CALCULATEDイベントの受信とアニメーション開始
+    - AnimationSystemの単体テスト実装
+    - システム統合テスト（PhyllotaxisSystem → AnimationSystem連携）
+    - **動作確認**: システム間イベント連携が正常に動作することを確認
+    - **動作確認**: `npm run test`でAnimationSystemのテストが全て通ることを確認
+    - 全体の整合性確認とコードレビュー
+    - Gitコミットとプッシュ（feat: implement AnimationSystem with tests）
+    - _要件: 3.3, アニメーション機能の完全実装_
 
-- [ ] 3.5 PhyllotaxisSystem設計の見直しと実装
-  - **現状分析**: 既存のPhyllotaxisSystem実装と設計文書の整合性確認
-  - **設計課題の特定**:
-    - フィロタキシス計算とECSシステムの統合方法の曖昧さ
-    - エンティティ位置更新のタイミングと頻度の仕様不足
-    - 重複回避ロジックとインデックス管理の仕様不明確
-    - イベント発火とシステム間連携の未定義
-  - **詳細仕様の策定**:
-    - PhyllotaxisSystemの具体的な動作仕様（トリガー、処理順序、更新頻度）
-    - フィロタキシス計算ユーティリティとの連携パターン
-    - エンティティインデックス管理と重複回避の仕組み
-    - 位置更新イベントとアニメーション連携の仕様
-  - **PhyllotaxisSystem実装**:
-    - BaseSystemを継承したPhyllotaxisSystemクラス
-    - エンティティ位置計算とフィロタキシス配置機能
-    - インデックス管理と重複回避ロジック
-    - イベント発火とシステム間連携機能
-  - **設計文書の更新**:
-    - docs/architecture/ecs/systems.md のPhyllotaxisSystem仕様追加
-    - docs/api/ecs-systems.md のPhyllotaxisSystem API記述
-  - **テスト実装**:
-    - PhyllotaxisSystemの単体テスト（システム実行、位置計算、イベント発火）
-    - フィロタキシス配置の正確性テスト（数学的検証）
-  - **動作確認**: PhyllotaxisSystemがECSシステムとして正常に登録・実行されることを確認
-  - **動作確認**: エンティティの位置計算が正確に行われることを確認
-  - **動作確認**: 重複回避ロジックが適切に動作することを確認
-  - **動作確認**: `npm run test`でPhyllotaxisSystemのテストが全て通ることを確認
-  - 全体の整合性確認とコードレビュー
-  - Gitコミットとプッシュ（feat: implement PhyllotaxisSystem with refined design）
-  - _要件: 3.3, フィロタキシス配置機能の完全実装_
+- [ ] 3.6 RenderSystem実装
+  - [ ] 3.6.1 RenderSystem基本実装
+    - **事前確認**: VisualComponent（src/ecs/components/VisualComponent.ts）の実装確認
+    - **設計確認**: docs/architecture/ecs/systems.md のRenderSystem仕様確認
+    - BaseSystemを継承したRenderSystemクラスの実装
+    - 必要なコンポーネント（POSITION, VISUAL）の定義
+    - SVG要素管理のためのentityElementsマップ実装
+    - **動作確認**: RenderSystemがBaseSystemを正しく継承していることを確認
+    - **動作確認**: 描画可能なエンティティのみが処理されることを確認
+  - [ ] 3.6.2 SVG描画ロジック実装
+    - SVG要素の動的生成と更新
+    - エンティティ位置に基づくSVG要素の配置
+    - 視覚コンポーネントに基づくスタイル適用
+    - 削除されたエンティティのSVG要素クリーンアップ
+    - **動作確認**: SVG要素が正確な位置に描画されることを確認
+    - **動作確認**: エンティティ削除時にSVG要素も適切に削除されることを確認
+  - [ ] 3.6.3 イベント統合とテスト実装
+    - RENDER_COMPLETEDイベントの発火実装
+    - ANIMATION_STARTイベントの受信と描画更新
+    - RenderSystemの単体テスト実装
+    - 3システム統合テスト（PhyllotaxisSystem → AnimationSystem → RenderSystem）
+    - **動作確認**: 3システムの連携が正常に動作することを確認
+    - **動作確認**: `npm run test`でRenderSystemのテストが全て通ることを確認
+    - 全体の整合性確認とコードレビュー
+    - Gitコミットとプッシュ（feat: implement RenderSystem with tests）
+    - _要件: 4.1, 4.2, 4.3, SVG描画機能の完全実装_
 
-- [ ] 3.6 ECS全体の整合性チェックと統合改善
+- [ ] 3.7 ECS主要システム統合テスト
+  - 3システム（PhyllotaxisSystem, AnimationSystem, RenderSystem）の統合動作テスト
+  - システム実行順序とイベント連携の検証
+  - パフォーマンステスト（10エンティティでの動作確認）
+  - **動作確認**: 3システムが設計通りの順序で実行されることを確認
+  - **動作確認**: エンティティ追加から描画完了までの一連の流れが正常に動作することを確認
+  - 全体の整合性確認とコードレビュー
+  - Gitコミットとプッシュ（feat: complete ECS main systems integration）
+  - _要件: 全要件の主要システム連携確認_
+
+- [ ] 3.8 ECS全体の整合性チェックと統合改善
   - **全体統合分析**: ECS実装全体（コンポーネント、エンティティ、システム）の整合性確認
   - **設計整合性の検証**:
     - コンポーネント間の依存関係と型整合性の確認
