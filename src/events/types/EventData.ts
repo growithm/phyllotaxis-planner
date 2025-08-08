@@ -65,6 +65,8 @@ export interface AnimationEvent {
   animationType: AnimationType;
   duration: number;
   easing: EasingType;
+  timestamp: number;
+  completedLoops?: number;
 }
 
 /**
@@ -107,8 +109,9 @@ export interface SystemErrorEvent {
 export interface SystemProcessedEvent {
   systemName: string;
   processedEntities: number;
-  executionTime: number;
-  timestamp: Date;
+  executionTime?: number;
+  timestamp: number;
+  animatingEntities?: EntityId[];
 }
 
 /**

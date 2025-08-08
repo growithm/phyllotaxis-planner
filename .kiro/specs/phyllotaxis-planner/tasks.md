@@ -409,8 +409,8 @@
   - Gitコミットとプッシュ（feat: implement React integration interface）
   - _要件: docs/architecture/ecs/react-integration.md、docs/api/react-integration.md に基づくReact統合インターフェース実装_
 
-- [ ] 3.4 PhyllotaxisSystem実装
-  - [ ] 3.4.1 PhyllotaxisSystem基本実装
+- [x] 3.4 PhyllotaxisSystem実装
+  - [x] 3.4.1 PhyllotaxisSystem基本実装
     - **事前確認**: フィロタキシス計算ユーティリティ（src/utils/phyllotaxis/）の実装確認
     - **設計確認**: docs/architecture/ecs/systems.md のPhyllotaxisSystem仕様確認
     - BaseSystemを継承したPhyllotaxisSystemクラスの実装
@@ -418,7 +418,7 @@
     - 基本的なupdate()メソッドの実装（フィルタリング→処理→イベント発火）
     - **動作確認**: PhyllotaxisSystemがBaseSystemを正しく継承していることを確認
     - **動作確認**: 必要なコンポーネントを持つエンティティのみが処理されることを確認
-  - [ ] 3.4.2 フィロタキシス配置計算ロジック実装
+  - [x] 3.4.2 フィロタキシス配置計算ロジック実装
     - **事前確認**: src/utils/phyllotaxis/calculations.ts の実装内容確認
     - フィロタキシス位置計算メソッドの実装
     - 黄金角（137.5°）を使用した螺旋配置計算
@@ -426,7 +426,7 @@
     - 位置変更検知とコンポーネント更新
     - **動作確認**: 黄金角による正確な螺旋配置が計算されることを確認
     - **動作確認**: エンティティの位置が適切に更新されることを確認
-  - [ ] 3.4.3 イベント統合とテスト実装
+  - [x] 3.4.3 イベント統合とテスト実装
     - POSITION_CALCULATEDイベントの発火実装
     - システム処理完了イベントの実装
     - PhyllotaxisSystemの単体テスト実装
