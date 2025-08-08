@@ -1,7 +1,12 @@
 import type { Position, AnimationType, EasingType } from '@/types';
 import type { EntityId } from '@/ecs/core/Entity';
 import type { EntityType } from '@/ecs/entities/EntityTypes';
-import { IdeaEvents, SystemEvents, UIEvents, LifecycleEvents } from './EventTypes';
+import {
+  IdeaEvents,
+  SystemEvents,
+  UIEvents,
+  LifecycleEvents,
+} from './EventTypes';
 
 /**
  * アイデア追加イベントのデータ
@@ -187,7 +192,7 @@ export interface EventMap {
   [IdeaEvents.IDEA_REMOVED]: IdeaRemovedEvent;
   [IdeaEvents.IDEA_UPDATED]: IdeaUpdatedEvent;
   [IdeaEvents.THEME_CHANGED]: ThemeChangedEvent;
-  
+
   // システム関連イベント
   [SystemEvents.POSITION_CALCULATED]: PositionCalculatedEvent;
   [SystemEvents.ANIMATION_START]: AnimationEvent;
@@ -197,14 +202,14 @@ export interface EventMap {
   [SystemEvents.SYSTEM_READY]: Record<string, never>; // 空のオブジェクト
   [SystemEvents.SYSTEM_PROCESSED]: SystemProcessedEvent;
   [SystemEvents.BATCH_UPDATE_COMPLETED]: BatchUpdateCompletedEvent;
-  
+
   // UI関連イベント
   [UIEvents.FORM_SUBMITTED]: FormSubmittedEvent;
   [UIEvents.BUTTON_CLICKED]: ButtonClickedEvent;
   [UIEvents.INPUT_CHANGED]: InputChangedEvent;
   [UIEvents.MODAL_OPENED]: ModalEvent;
   [UIEvents.MODAL_CLOSED]: ModalEvent;
-  
+
   // ライフサイクル関連イベント
   [LifecycleEvents.BEFORE_CREATE]: LifecycleEventData;
   [LifecycleEvents.AFTER_CREATE]: LifecycleEventData;
@@ -217,4 +222,3 @@ export interface EventMap {
   [LifecycleEvents.VALIDATION_FAILED]: ValidationFailedEventData;
   [LifecycleEvents.STATE_CHANGED]: StateChangeEventData;
 }
-

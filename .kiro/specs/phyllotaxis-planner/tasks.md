@@ -341,7 +341,7 @@
   - Gitコミットとプッシュ（feat: implement PerformanceMonitor integration）
   - _要件: docs/architecture/ecs/performance-monitor.md、docs/api/ecs-performance-monitor.md に基づくPerformanceMonitor統合実装_
 
-- [ ] 3.3.5 EntityFactory統合完成
+- [x] 3.3.5 EntityFactory統合完成
   - **事前確認**: World統合設計文書（docs/architecture/ecs/world.md）とAPI仕様書（docs/api/world-integration.md）を確認
   - **BlueprintRegistry実装**:
     - BlueprintRegistryクラスの実装（docs/api/world-integration.md準拠）
@@ -372,7 +372,7 @@
   - Gitコミットとプッシュ（feat: complete EntityFactory integration）
   - _要件: docs/architecture/ecs/world.md、docs/api/world-integration.md に基づくEntityFactory統合完成_
 
-- [ ] 3.3.6 React統合インターフェース実装
+- [x] 3.3.6 React統合インターフェース実装
   - **事前確認**: React統合設計文書（docs/architecture/ecs/react-integration.md）とAPI仕様書（docs/api/react-integration.md）を確認
   - **useWorldフック実装**:
     - useWorldフックの基本実装（docs/api/react-integration.md準拠）

@@ -1,72 +1,57 @@
-# Technology Stack
+# 技術スタック
 
-## Framework & Runtime
-- **Next.js 15** with App Router for full-stack React development
-- **React 18** with server and client components
-- **TypeScript 5** for type safety and developer experience
-- **Node.js 18+** runtime environment
+## フレームワーク・ライブラリ
 
-## Styling & UI
-- **Tailwind CSS 3** for utility-first styling
-- **SVG** for mathematical visualizations and animations
-- **CSS-in-JS** only when dynamic styles are required
-- Custom `cn` utility combining `clsx` and `tailwind-merge`
+- **Next.js 15**: App Routerを使用したモダンなReactフレームワーク
+- **React 18**: UIライブラリ
+- **TypeScript 5**: 型安全な開発言語
+- **Tailwind CSS 3**: ユーティリティファーストのCSSフレームワーク
 
-## Architecture Patterns
-- **ECS (Entity Component System)** for data management
-- **Event-driven architecture** for system communication
-- **Component-based design** with clear separation of concerns
-- **Query system** for efficient data retrieval
+## 開発ツール
 
-## Testing & Quality
-- **Vitest** for unit testing with jsdom environment
-- **Playwright** for E2E testing
-- **React Testing Library** for component testing
-- **ESLint** with TypeScript and React rules
-- **Prettier** for code formatting
-- **Husky** for git hooks with lint-staged
+- **ESLint**: コード品質管理（TypeScript、React対応）
+- **Prettier**: コードフォーマッター
+- **Husky**: Git hooks管理
+- **lint-staged**: ステージされたファイルのリント
 
-## Development Tools
-- **Storybook** for component documentation
-- **MSW (Mock Service Worker)** for API mocking
-- **TypeScript path aliases** (`@/*` patterns)
-- **Hot reload** and **Fast Refresh** for development
+## テスト環境
 
-## Common Commands
+- **Vitest**: 単体テストフレームワーク
+- **React Testing Library**: Reactコンポーネントテスト
+- **Playwright**: E2Eテスト
+- **Storybook**: コンポーネントドキュメント・テスト
 
-### Development
+## よく使用するコマンド
+
+### 開発
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
+npm run dev          # 開発サーバー起動
+npm run build        # プロダクションビルド
+npm run start        # プロダクションサーバー起動
 ```
 
-### Testing
+### コード品質
 ```bash
-npm run test         # Run unit tests
-npm run test:ui      # Run tests with UI
-npm run test:coverage # Generate coverage report
-npm run test:e2e     # Run E2E tests
+npm run lint         # ESLintチェック
+npm run lint:fix     # ESLint自動修正
+npm run format       # Prettierフォーマット
+npm run type-check   # TypeScript型チェック
 ```
 
-### Code Quality
+### テスト
 ```bash
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
-npm run type-check   # TypeScript type checking
-npm run format       # Format with Prettier
-npm run format:check # Check formatting
+npm run test         # 単体テスト実行
+npm run test:ui      # テストUIモード
+npm run test:coverage # カバレッジ付きテスト
+npm run test:e2e     # E2Eテスト実行
 ```
 
-### Documentation
+### ドキュメント
 ```bash
-npm run storybook    # Start Storybook dev server
-npm run build-storybook # Build Storybook
+npm run storybook    # Storybook起動
 ```
 
-## Performance Considerations
-- Server-side rendering by default
-- Client components only when necessary (`'use client'`)
-- Lazy loading for heavy components
-- Memoization with `React.memo`, `useMemo`, `useCallback`
-- SVG optimization for mathematical visualizations
+## 環境要件
+
+- Node.js 18.0.0以上
+- npm 8.0.0以上

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EventBusImpl } from '@/events/core';
 import type { EventBus } from '@/events/core';
 import { EventErrorHandler } from '@/events/handlers';
-import { SystemEvents, UIEvents } from '@/events/types';
+import { SystemEvents, UIEvents, TestEvents } from '@/events/types';
 import type { ErrorEvent } from '@/events/types';
 
 describe('EventErrorHandler', () => {

@@ -20,6 +20,7 @@ export enum SystemEvents {
   SYSTEM_READY = 'system:ready',
   SYSTEM_PROCESSED = 'system:processed',
   BATCH_UPDATE_COMPLETED = 'batch:update:completed',
+  ERROR = 'error',
 }
 
 /**
@@ -48,3 +49,24 @@ export enum LifecycleEvents {
   VALIDATION_FAILED = 'entity:validationFailed',
   STATE_CHANGED = 'entity:stateChanged',
 }
+
+/**
+ * テスト関連のイベント定義
+ */
+export enum TestEvents {
+  TEST_RECOVERY = 'test:recovery',
+}
+
+/**
+ * React統合・同期関連のイベント定義
+ * ECS状態とReact状態の同期で使用されるイベント
+ */
+export const SyncEventTypes = {
+  ENTITY_CREATED: LifecycleEvents.AFTER_CREATE,
+  ENTITY_DESTROYED: LifecycleEvents.AFTER_DESTROY,
+  COMPONENT_ADDED: LifecycleEvents.COMPONENT_ADDED,
+  COMPONENT_REMOVED: LifecycleEvents.COMPONENT_REMOVED,
+  COMPONENT_UPDATED: LifecycleEvents.AFTER_UPDATE,
+} as const;
+
+

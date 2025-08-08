@@ -1,4 +1,5 @@
 import type { EventBus, EventBusOptions } from './EventBus';
+import { SystemEvents } from '../types/EventTypes';
 
 /**
  * EventBus実装クラス
@@ -42,7 +43,7 @@ export class EventBusImpl implements EventBus {
           handler(data);
         } catch (error) {
           console.error(`[EventBus] Error in handler for ${event}:`, error);
-          this.emit('error', { event, error, data });
+          this.emit(SystemEvents.ERROR, { event, error, data });
         }
       });
     }

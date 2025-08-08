@@ -1,30 +1,25 @@
-# Product Overview
+# プロダクト概要
 
-Phyllotaxis Planner is an organic thought organization tool that applies the mathematical principles of phyllotaxis (leaf arrangement patterns in plants) to create beautiful, natural layouts for ideas and tasks.
+## Phyllotaxis Planner とは
 
-## Core Concept
+植物の葉序（フィロタキシス）の法則を応用した有機的な思考整理ツールです。ユーザーが入力したアイデアやタスクが、自然の法則（黄金角137.5°）に従って美しく自動配置されることで、従来の無機質なタスク管理ツールとは一線を画す「思考を育てる」感覚を提供します。
 
-The application uses the golden angle (137.5°) to automatically arrange user-input ideas in a spiral pattern, mimicking how plants optimize leaf placement for maximum sunlight exposure. This creates an intuitive, visually appealing alternative to traditional mind mapping tools.
+## 核となる価値
 
-## Key Features
+- **自然な配置**: 黄金角による有機的なレイアウト
+- **美しいアニメーション**: 思考が生き物のように成長する体験
+- **直感的な理解**: 視覚的に美しく、理解しやすい思考マップ
+- **情報の最適化**: 重複を避けながら最大限の情報を表示
 
-- **Natural Positioning**: Ideas are automatically arranged using phyllotaxis algorithms
-- **Organic Growth**: New ideas appear with smooth animations that feel alive
-- **Responsive Design**: Works seamlessly across all devices
-- **High Performance**: Optimized for handling large numbers of ideas
-- **Accessibility**: Built with WCAG 2.1 AA compliance in mind
+## ターゲットユーザー
 
-## Target Users
+- 創造的な思考整理を求める人
+- 従来のタスク管理ツールに物足りなさを感じる人
+- 美しいUIと自然な体験を重視する人
 
-- Knowledge workers organizing complex thoughts
-- Students creating visual study materials  
-- Designers exploring creative concepts
-- Anyone seeking a more natural approach to idea organization
+## 技術的特徴
 
-## Technical Philosophy
-
-The application emphasizes:
-- Mathematical beauty through natural patterns
-- Performance through efficient algorithms
-- Maintainability through clean architecture
-- User experience through thoughtful design
+- Next.js 15 (App Router) による高速なWebアプリケーション
+- TypeScriptによる型安全な開発
+- SVGベースの美しい描画
+- Entity Component System (ECS) アーキテクチャによる柔軟な設計
