@@ -437,8 +437,8 @@
     - Gitコミットとプッシュ（feat: implement PhyllotaxisSystem with tests）
     - _要件: 3.1, 3.2, フィロタキシス配置機能の完全実装_
 
-- [ ] 3.5 AnimationSystem実装
-  - [ ] 3.5.1 AnimationSystem基本実装
+- [x] 3.5 AnimationSystem実装
+  - [x] 3.5.1 AnimationSystem基本実装
     - **事前確認**: AnimationComponent（src/ecs/components/AnimationComponent.ts）の実装確認
     - **設計確認**: docs/architecture/ecs/systems.md のAnimationSystem仕様確認
     - BaseSystemを継承したAnimationSystemクラスの実装
@@ -446,14 +446,14 @@
     - 基本的なupdate()メソッドの実装
     - **動作確認**: AnimationSystemがBaseSystemを正しく継承していることを確認
     - **動作確認**: アニメーション中のエンティティのみが処理されることを確認
-  - [ ] 3.5.2 アニメーション状態管理ロジック実装
+  - [x] 3.5.2 アニメーション状態管理ロジック実装
     - アニメーション進行度計算の実装
     - CSS transitionとの連携機能
     - アニメーション完了検知とコールバック処理
     - 複数アニメーションタイプ（fadeIn, slideIn等）の対応
     - **動作確認**: アニメーション進行度が正確に計算されることを確認
     - **動作確認**: アニメーション完了時に適切に状態が更新されることを確認
-  - [ ] 3.5.3 イベント統合とテスト実装
+  - [x] 3.5.3 イベント統合とテスト実装
     - ANIMATION_START/ENDイベントの発火実装
     - POSITION_CALCULATEDイベントの受信とアニメーション開始
     - AnimationSystemの単体テスト実装
