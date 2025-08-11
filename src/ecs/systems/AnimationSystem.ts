@@ -39,6 +39,7 @@ export class AnimationSystem extends BaseSystem {
 
   private readonly options: Required<AnimationSystemOptions>;
   private readonly animatingEntities = new Set<EntityId>();
+  private readonly pendingAnimations = new Set<EntityId>();
 
   /**
    * AnimationSystemのコンストラクタ
@@ -75,7 +76,9 @@ export class AnimationSystem extends BaseSystem {
 
     // 位置計算完了時にアニメーション開始
     this.eventBus.on(SystemEvents.POSITION_CALCULATED, (data: any) => {
-      this.startPositionAnimation(data.entityId);
+      // worldインスタンスを保存しておく必要があるため、
+      // 実際のアニメーション開始は update メソッド内で処理する
+      this.pendingAnimations.add(data.entityId);
     });
   }
 
@@ -94,6 +97,9 @@ export class AnimationSystem extends BaseSystem {
     world: IWorld,
     deltaTime: number
   ): void {
+    // 保留中のアニメーションを開始
+    this.processPendingAnimations(world);
+
     // アニメーション中のエンティティのみを処理
     const animatingEntities = entities.filter(entityId => {
       const animationComponent = world.getComponent<IAnimationComponent>(
@@ -109,17 +115,79 @@ export class AnimationSystem extends BaseSystem {
   }
 
   /**
+   * 保留中のアニメーションを処理
+   *
+   * @param world - ECSワールドインスタンス
+   */
+  private processPendingAnimations(world: IWorld): void {
+    // 保留中のアニメーションを開始
+    for (const entityId of this.pendingAnimations) {
+      this.startPositionAnimation(entityId, world);
+    }
+    
+    // 保留中のアニメーションをクリア
+    this.pendingAnimations.clear();
+  }
+
+  /**
    * 位置アニメーションを開始
    *
    * @param entityId - エンティティID
+   * @param world - ECSワールドインスタンス
    */
-  private startPositionAnimation(entityId: EntityId): void {
+  private startPositionAnimation(entityId: EntityId, world: IWorld): void {
+    // エンティティが存在するかチェック
+    if (!world.hasEntity(entityId)) {
+      console.warn(`AnimationSystem: Entity ${entityId} does not exist`);
+      return;
+    }
+
+    // AnimationComponentを取得または作成
+    let animationComponent = world.getComponent<IAnimationComponent>(
+      entityId,
+      ComponentTypes.ANIMATION
+    );
+
+    if (!animationComponent) {
+      // AnimationComponentが存在しない場合は作成
+      animationComponent = {
+        type: ComponentTypes.ANIMATION,
+        animationType: 'slideIn' as AnimationType,
+        duration: this.options.defaultDuration,
+        easing: this.options.defaultEasing,
+        delay: 0,
+        isAnimating: true,
+        progress: 0,
+        startTime: Date.now(),
+        endTime: undefined,
+        loop: false,
+        loopCount: 1,
+        currentLoop: 0,
+        cssClasses: [],
+        cssTransition: '',
+        onComplete: undefined,
+        onLoop: undefined,
+      };
+
+      // コンポーネントを追加
+      world.addComponent(entityId, animationComponent);
+    } else {
+      // 既存のAnimationComponentを更新
+      animationComponent.isAnimating = true;
+      animationComponent.progress = 0;
+      animationComponent.startTime = Date.now();
+      animationComponent.endTime = undefined;
+      animationComponent.animationType = 'slideIn' as AnimationType;
+      animationComponent.duration = this.options.defaultDuration;
+      animationComponent.easing = this.options.defaultEasing;
+    }
+
     // アニメーション開始イベントを発火
     this.emitSystemEvent(SystemEvents.ANIMATION_START, {
       entityId,
-      animationType: 'slideIn' as AnimationType,
-      duration: this.options.defaultDuration,
-      easing: this.options.defaultEasing,
+      animationType: animationComponent.animationType,
+      duration: animationComponent.duration,
+      easing: animationComponent.easing,
       timestamp: Date.now(),
     });
 
@@ -259,7 +327,7 @@ export class AnimationSystem extends BaseSystem {
 
     const cy = 3 * y1;
     const by = 3 * (y2 - y1) - cy;
-    const ay = 1 - cy - by;
+    const _ay = 1 - cy - by;
 
     return ((ax * t + bx) * t + cx) * t;
   }
@@ -307,7 +375,7 @@ export class AnimationSystem extends BaseSystem {
    * フェードインエフェクトを適用
    */
   private applyFadeInEffect(animationComponent: IAnimationComponent): void {
-    const opacity = animationComponent.progress;
+    const _opacity = animationComponent.progress;
 
     // CSSクラスを更新
     animationComponent.cssClasses = [
@@ -325,7 +393,7 @@ export class AnimationSystem extends BaseSystem {
    */
   private applySlideInEffect(
     animationComponent: IAnimationComponent,
-    positionComponent: IPositionComponent
+    _positionComponent: IPositionComponent
   ): void {
     // CSS transitionプロパティを設定
     animationComponent.cssTransition = `transform ${animationComponent.duration}ms ${animationComponent.easing}`;
@@ -342,7 +410,7 @@ export class AnimationSystem extends BaseSystem {
    * スケールエフェクトを適用
    */
   private applyScaleEffect(animationComponent: IAnimationComponent): void {
-    const scale = animationComponent.progress;
+    const _scale = animationComponent.progress;
 
     animationComponent.cssTransition = `transform ${animationComponent.duration}ms ${animationComponent.easing}`;
     animationComponent.cssClasses = ['transition-transform', 'origin-center'];
@@ -365,7 +433,7 @@ export class AnimationSystem extends BaseSystem {
   private completeAnimation(
     entityId: EntityId,
     animationComponent: IAnimationComponent,
-    world: IWorld
+    _world: IWorld
   ): void {
     // アニメーション状態をリセット
     animationComponent.isAnimating = false;
